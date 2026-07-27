@@ -46,6 +46,62 @@ export type SiteSettings = {
   testimonialsEyebrowPt: string;
   testimonialsTitlePt: string;
   testimonialsDescriptionPt: string;
+
+  // Editable section headings — Programs
+  programsEyebrow: string;
+  programsTitle: string;
+  programsDescription: string;
+  programsEyebrowPt: string;
+  programsTitlePt: string;
+  programsDescriptionPt: string;
+
+  // Editable section headings — Our Team
+  teamEyebrow: string;
+  teamTitle: string;
+  teamDescription: string;
+  teamEyebrowPt: string;
+  teamTitlePt: string;
+  teamDescriptionPt: string;
+
+  // Editable section headings — Events & Activities
+  eventsEyebrow: string;
+  eventsTitle: string;
+  eventsDescription: string;
+  eventsEyebrowPt: string;
+  eventsTitlePt: string;
+  eventsDescriptionPt: string;
+
+  // Editable section headings — Gallery
+  galleryEyebrow: string;
+  galleryTitle: string;
+  galleryDescription: string;
+  galleryEyebrowPt: string;
+  galleryTitlePt: string;
+  galleryDescriptionPt: string;
+
+  // Editable section headings — Partners
+  partnersEyebrow: string;
+  partnersTitle: string;
+  partnersDescription: string;
+  partnersEyebrowPt: string;
+  partnersTitlePt: string;
+  partnersDescriptionPt: string;
+
+  // Editable section headings — FAQ
+  faqEyebrow: string;
+  faqTitle: string;
+  faqDescription: string;
+  faqEyebrowPt: string;
+  faqTitlePt: string;
+  faqDescriptionPt: string;
+
+  // Editable section headings — Contact
+  contactEyebrow: string;
+  contactTitle: string;
+  contactDescription: string;
+  contactEyebrowPt: string;
+  contactTitlePt: string;
+  contactDescriptionPt: string;
 };
 
 export type ServiceItem = {

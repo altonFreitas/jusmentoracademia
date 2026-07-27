@@ -298,6 +298,50 @@ alter table public.site_settings add column if not exists testimonials_eyebrow_p
 alter table public.site_settings add column if not exists testimonials_title_pt text not null default '';
 alter table public.site_settings add column if not exists testimonials_description_pt text not null default '';
 
+-- Editable section headings for the remaining public sections.
+alter table public.site_settings add column if not exists programs_eyebrow text not null default '';
+alter table public.site_settings add column if not exists programs_title text not null default '';
+alter table public.site_settings add column if not exists programs_description text not null default '';
+alter table public.site_settings add column if not exists programs_eyebrow_pt text not null default '';
+alter table public.site_settings add column if not exists programs_title_pt text not null default '';
+alter table public.site_settings add column if not exists programs_description_pt text not null default '';
+alter table public.site_settings add column if not exists team_eyebrow text not null default '';
+alter table public.site_settings add column if not exists team_title text not null default '';
+alter table public.site_settings add column if not exists team_description text not null default '';
+alter table public.site_settings add column if not exists team_eyebrow_pt text not null default '';
+alter table public.site_settings add column if not exists team_title_pt text not null default '';
+alter table public.site_settings add column if not exists team_description_pt text not null default '';
+alter table public.site_settings add column if not exists events_eyebrow text not null default '';
+alter table public.site_settings add column if not exists events_title text not null default '';
+alter table public.site_settings add column if not exists events_description text not null default '';
+alter table public.site_settings add column if not exists events_eyebrow_pt text not null default '';
+alter table public.site_settings add column if not exists events_title_pt text not null default '';
+alter table public.site_settings add column if not exists events_description_pt text not null default '';
+alter table public.site_settings add column if not exists gallery_eyebrow text not null default '';
+alter table public.site_settings add column if not exists gallery_title text not null default '';
+alter table public.site_settings add column if not exists gallery_description text not null default '';
+alter table public.site_settings add column if not exists gallery_eyebrow_pt text not null default '';
+alter table public.site_settings add column if not exists gallery_title_pt text not null default '';
+alter table public.site_settings add column if not exists gallery_description_pt text not null default '';
+alter table public.site_settings add column if not exists partners_eyebrow text not null default '';
+alter table public.site_settings add column if not exists partners_title text not null default '';
+alter table public.site_settings add column if not exists partners_description text not null default '';
+alter table public.site_settings add column if not exists partners_eyebrow_pt text not null default '';
+alter table public.site_settings add column if not exists partners_title_pt text not null default '';
+alter table public.site_settings add column if not exists partners_description_pt text not null default '';
+alter table public.site_settings add column if not exists faq_eyebrow text not null default '';
+alter table public.site_settings add column if not exists faq_title text not null default '';
+alter table public.site_settings add column if not exists faq_description text not null default '';
+alter table public.site_settings add column if not exists faq_eyebrow_pt text not null default '';
+alter table public.site_settings add column if not exists faq_title_pt text not null default '';
+alter table public.site_settings add column if not exists faq_description_pt text not null default '';
+alter table public.site_settings add column if not exists contact_eyebrow text not null default '';
+alter table public.site_settings add column if not exists contact_title text not null default '';
+alter table public.site_settings add column if not exists contact_description text not null default '';
+alter table public.site_settings add column if not exists contact_eyebrow_pt text not null default '';
+alter table public.site_settings add column if not exists contact_title_pt text not null default '';
+alter table public.site_settings add column if not exists contact_description_pt text not null default '';
+
 -- Portuguese translations for each content collection.
 alter table public.services add column if not exists title_pt text not null default '';
 alter table public.services add column if not exists description_pt text not null default '';

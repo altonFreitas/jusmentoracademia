@@ -160,6 +160,60 @@ const sectionHeadingConfig: Partial<
     headingPt: "testimonialsTitlePt",
     descriptionPt: "testimonialsDescriptionPt",
   },
+  programs: {
+    title: 'Section heading — "Programs"',
+    eyebrow: "programsEyebrow",
+    heading: "programsTitle",
+    description: "programsDescription",
+    eyebrowPt: "programsEyebrowPt",
+    headingPt: "programsTitlePt",
+    descriptionPt: "programsDescriptionPt",
+  },
+  team: {
+    title: 'Section heading — "Our Team"',
+    eyebrow: "teamEyebrow",
+    heading: "teamTitle",
+    description: "teamDescription",
+    eyebrowPt: "teamEyebrowPt",
+    headingPt: "teamTitlePt",
+    descriptionPt: "teamDescriptionPt",
+  },
+  events: {
+    title: 'Section heading — "Events & Activities"',
+    eyebrow: "eventsEyebrow",
+    heading: "eventsTitle",
+    description: "eventsDescription",
+    eyebrowPt: "eventsEyebrowPt",
+    headingPt: "eventsTitlePt",
+    descriptionPt: "eventsDescriptionPt",
+  },
+  gallery: {
+    title: 'Section heading — "Gallery"',
+    eyebrow: "galleryEyebrow",
+    heading: "galleryTitle",
+    description: "galleryDescription",
+    eyebrowPt: "galleryEyebrowPt",
+    headingPt: "galleryTitlePt",
+    descriptionPt: "galleryDescriptionPt",
+  },
+  partners: {
+    title: 'Section heading — "Partners"',
+    eyebrow: "partnersEyebrow",
+    heading: "partnersTitle",
+    description: "partnersDescription",
+    eyebrowPt: "partnersEyebrowPt",
+    headingPt: "partnersTitlePt",
+    descriptionPt: "partnersDescriptionPt",
+  },
+  faqs: {
+    title: 'Section heading — "FAQ"',
+    eyebrow: "faqEyebrow",
+    heading: "faqTitle",
+    description: "faqDescription",
+    eyebrowPt: "faqEyebrowPt",
+    headingPt: "faqTitlePt",
+    descriptionPt: "faqDescriptionPt",
+  },
 };
 
 function textFromError(error: unknown) {
@@ -1616,6 +1670,70 @@ export default function AdminSite() {
                         Social links now live in their own <strong>Social
                         links</strong> tab, where you can add any platform.
                       </p>
+                    </div>
+                  </div>
+
+                  <div className="editor-card top-gap-sm">
+                    <div className="editor-card-top">
+                      <strong>Section heading — &quot;Contact&quot;</strong>
+                      <button
+                        type="button"
+                        className="gold-btn"
+                        disabled={busy}
+                        onClick={saveSettings}
+                      >
+                        {busy ? "Saving..." : "Save heading"}
+                      </button>
+                    </div>
+                    <p className="admin-hint">
+                      The heading shown above the contact card at the bottom of
+                      the site. Portuguese fields are optional.
+                    </p>
+                    <div className="settings-grid top-gap-sm">
+                      <Field
+                        label="Eyebrow"
+                        value={content.settings.contactEyebrow}
+                        onChange={(v) => updateSetting("contactEyebrow", v)}
+                      />
+                      <Field
+                        label="Eyebrow (Português)"
+                        value={content.settings.contactEyebrowPt}
+                        onChange={(v) => updateSetting("contactEyebrowPt", v)}
+                      />
+                      <div className="span-2">
+                        <Field
+                          label="Title"
+                          value={content.settings.contactTitle}
+                          onChange={(v) => updateSetting("contactTitle", v)}
+                        />
+                      </div>
+                      <div className="span-2">
+                        <Field
+                          label="Title (Português)"
+                          value={content.settings.contactTitlePt}
+                          onChange={(v) => updateSetting("contactTitlePt", v)}
+                        />
+                      </div>
+                      <div className="span-2">
+                        <Field
+                          label="Description"
+                          value={content.settings.contactDescription}
+                          onChange={(v) =>
+                            updateSetting("contactDescription", v)
+                          }
+                          textarea
+                        />
+                      </div>
+                      <div className="span-2">
+                        <Field
+                          label="Description (Português)"
+                          value={content.settings.contactDescriptionPt}
+                          onChange={(v) =>
+                            updateSetting("contactDescriptionPt", v)
+                          }
+                          textarea
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

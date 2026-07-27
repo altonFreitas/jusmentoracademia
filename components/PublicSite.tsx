@@ -907,9 +907,9 @@ export default function PublicSite() {
         <section id="programs" className="section band-dark programs-section">
           <div className="container">
             <SectionTitle
-              eyebrow={t("programsEyebrow")}
-              title={t("programsTitle")}
-              description={t("programsDescription")}
+              eyebrow={heading(settings.programsEyebrow, settings.programsEyebrowPt, "programsEyebrow")}
+              title={heading(settings.programsTitle, settings.programsTitlePt, "programsTitle")}
+              description={heading(settings.programsDescription, settings.programsDescriptionPt, "programsDescription")}
               light
             />
             {loading ? (
@@ -937,9 +937,9 @@ export default function PublicSite() {
         <section id="team" className="section">
           <div className="container">
             <SectionTitle
-              eyebrow={t("teamEyebrow")}
-              title={t("teamTitle")}
-              description={t("teamDescription")}
+              eyebrow={heading(settings.teamEyebrow, settings.teamEyebrowPt, "teamEyebrow")}
+              title={heading(settings.teamTitle, settings.teamTitlePt, "teamTitle")}
+              description={heading(settings.teamDescription, settings.teamDescriptionPt, "teamDescription")}
             />
             {loading ? (
               <SkeletonGrid count={3} columns="three-grid" lines={3} />
@@ -969,9 +969,9 @@ export default function PublicSite() {
         <section id="events" className="section band-cream">
           <div className="container">
             <SectionTitle
-              eyebrow={t("eventsEyebrow")}
-              title={t("eventsTitle")}
-              description={t("eventsDescription")}
+              eyebrow={heading(settings.eventsEyebrow, settings.eventsEyebrowPt, "eventsEyebrow")}
+              title={heading(settings.eventsTitle, settings.eventsTitlePt, "eventsTitle")}
+              description={heading(settings.eventsDescription, settings.eventsDescriptionPt, "eventsDescription")}
             />
             {loading ? (
               <SkeletonGrid count={3} columns="three-grid" media lines={3} />
@@ -1033,9 +1033,9 @@ export default function PublicSite() {
         <section id="gallery" className="section white-band">
           <div className="container">
             <SectionTitle
-              eyebrow={t("galleryEyebrow")}
-              title={t("galleryTitle")}
-              description={t("galleryDescription")}
+              eyebrow={heading(settings.galleryEyebrow, settings.galleryEyebrowPt, "galleryEyebrow")}
+              title={heading(settings.galleryTitle, settings.galleryTitlePt, "galleryTitle")}
+              description={heading(settings.galleryDescription, settings.galleryDescriptionPt, "galleryDescription")}
             />
             {loading ? (
               <SkeletonGrid count={3} columns="three-grid" media lines={1} />
@@ -1103,9 +1103,9 @@ export default function PublicSite() {
         <section id="partners" className="section">
           <div className="container">
             <SectionTitle
-              eyebrow={t("partnersEyebrow")}
-              title={t("partnersTitle")}
-              description={t("partnersDescription")}
+              eyebrow={heading(settings.partnersEyebrow, settings.partnersEyebrowPt, "partnersEyebrow")}
+              title={heading(settings.partnersTitle, settings.partnersTitlePt, "partnersTitle")}
+              description={heading(settings.partnersDescription, settings.partnersDescriptionPt, "partnersDescription")}
             />
             {loading ? (
               <SkeletonGrid count={3} columns="three-grid" lines={2} />
@@ -1160,9 +1160,9 @@ export default function PublicSite() {
         <section id="faq" className="section band-cream">
           <div className="container">
             <SectionTitle
-              eyebrow={t("faqEyebrow")}
-              title={t("faqTitle")}
-              description={t("faqDescription")}
+              eyebrow={heading(settings.faqEyebrow, settings.faqEyebrowPt, "faqEyebrow")}
+              title={heading(settings.faqTitle, settings.faqTitlePt, "faqTitle")}
+              description={heading(settings.faqDescription, settings.faqDescriptionPt, "faqDescription")}
             />
             {loading ? (
               <div className="faq-list top-gap-lg skeleton-grid" aria-hidden="true">
@@ -1205,12 +1205,14 @@ export default function PublicSite() {
           <div className="container">
             <div className="card dark contact-center reveal">
               <div className="card-body">
-                <div className="eyebrow eyebrow-light">{t("contactEyebrow")}</div>
+                <div className="eyebrow eyebrow-light">
+                  {heading(settings.contactEyebrow, settings.contactEyebrowPt, "contactEyebrow")}
+                </div>
                 <h2 className="section-title light top-gap-sm">
-                  {t("contactTitle")}
+                  {heading(settings.contactTitle, settings.contactTitlePt, "contactTitle")}
                 </h2>
                 <p className="section-description light top-gap-sm contact-center-copy">
-                  {t("contactDescription")}
+                  {heading(settings.contactDescription, settings.contactDescriptionPt, "contactDescription")}
                 </p>
 
                 <div className="contact-center-grid top-gap-lg">
