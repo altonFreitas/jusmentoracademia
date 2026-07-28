@@ -810,7 +810,7 @@ export default function PublicSite() {
           </div>
         </section>
 
-        <section id="about" className="section">
+        <section id="about" className="section about-section">
           <div className="container">
             <SectionTitle
               eyebrow={heading(settings.aboutEyebrow, settings.aboutEyebrowPt, "aboutEyebrow")}
