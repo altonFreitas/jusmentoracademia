@@ -9,14 +9,14 @@ values (
   1,
   'JusMentor Academia',
   'JMA',
-  'Legal education institute · Dili, Timor-Leste',
+  'Legal education institute · Díli, Timor-Leste',
   'Making the law understandable, practical, and within reach for every community.',
-  'JusMentor Academia is a legal education institute in Dili, Timor-Leste. Through courses, seminars, and advocacy, we help students, youth, and communities understand their rights and build a stronger culture of justice.',
+  'JusMentor Academia is a legal education institute in Díli, Timor-Leste. Through courses, seminars, and advocacy, we help students, youth, and communities understand their rights and build a stronger culture of justice.',
   'Legal Education · Advocacy · Training · Community Empowerment',
   'jusmentoracademia@gmail.com',
   '+670 7511 4252',
   '67075114252',
-  'Surikmas, Dili, Timor-Leste',
+  'Surikmas, Díli, Timor-Leste',
   '2024',
   'To make quality legal education, practical training, and advocacy available to the people who need it most, turning legal knowledge into everyday confidence.',
   'A Timor-Leste where every person understands their rights, and where a new generation of ethical, well-trained leaders carries justice forward.',
@@ -68,12 +68,12 @@ insert into public.team (name, role, bio, sort_order) values
 ('Training & Events', 'Workshops & seminars', 'Plans and runs the workshops, seminars, and public events that bring our programs to life.', 2);
 
 insert into public.events (title, date_label, location, summary, sort_order) values
-('Legal Awareness Seminar', 'Monthly', 'Dili, Timor-Leste', 'An open, public seminar on rights, responsibilities, and the everyday law that shapes our communities.', 0),
+('Legal Awareness Seminar', 'Monthly', 'Díli, Timor-Leste', 'An open, public seminar on rights, responsibilities, and the everyday law that shapes our communities.', 0),
 ('Youth Leadership Training', 'Quarterly', 'In-person & online', 'A hands-on program that pairs legal understanding with leadership skills and real community action.', 1),
 ('Online Learning Session', 'Weekly', 'Online', 'A short, focused lesson that makes a single legal concept clear, then opens the floor for questions.', 2);
 
 insert into public.testimonials (name, role, quote, sort_order) values
-('Course participant', 'Dili', 'The lessons made legal ideas feel simple and useful. For the first time, I understood rights I never knew I had.', 0),
+('Course participant', 'Díli', 'The lessons made legal ideas feel simple and useful. For the first time, I understood rights I never knew I had.', 0),
 ('Seminar attendee', 'Community member', 'Engaging, modern, and genuinely relevant for young people. The seminars start real conversations.', 1),
 ('Training participant', 'Youth leader', 'Professional, inspiring, and practical. I left ready to take action in my own community.', 2);
 
