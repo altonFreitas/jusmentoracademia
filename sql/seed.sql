@@ -10,7 +10,7 @@ values (
   'JusMentor Academia',
   'JMA',
   'Legal education institute · Díli, Timor-Leste',
-  'Making the law understandable, practical, and within reach for every community.',
+  'Empowering communities through legal education, advocacy, and modern learning.',
   'JusMentor Academia is a legal education institute in Díli, Timor-Leste. Through courses, seminars, and advocacy, we help students, youth, and communities understand their rights and build a stronger culture of justice.',
   'Legal Education · Advocacy · Training · Community Empowerment',
   'jusmentoracademia@gmail.com',

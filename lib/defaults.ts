@@ -19,7 +19,7 @@ export const defaultSettings: SiteSettings = {
   name: "JusMentor Academia",
   shortName: "JMA",
   heroLabel: "Legal education institute · Dili, Timor-Leste",
-  heroTitle: "Making the law understandable, practical, and within reach for every community.",
+  heroTitle: "Empowering communities through legal education, advocacy, and modern learning.",
   heroDescription:
     "JusMentor Academia is a legal education institute in Dili, Timor-Leste. Through courses, seminars, and advocacy, we help students, youth, and communities understand their rights and build a stronger culture of justice.",
   heroImage: "",
