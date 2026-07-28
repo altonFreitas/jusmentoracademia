@@ -216,6 +216,20 @@ const sectionHeadingConfig: Partial<
   },
 };
 
+/** Every sidebar destination — "Settings" plus every collection tab — sorted
+    alphabetically (A→Z) by its visible label, so the nav reads like a clean
+    list rather than a hand-picked order. */
+const sidebarNavItems: { key: "settings" | AdminCollectionKey; label: string }[] =
+  (
+    [
+      { key: "settings", label: "Settings" },
+      ...(Object.keys(collectionLabels) as AdminCollectionKey[]).map((key) => ({
+        key,
+        label: collectionLabels[key],
+      })),
+    ] as { key: "settings" | AdminCollectionKey; label: string }[]
+  ).sort((a, b) => a.label.localeCompare(b.label));
+
 function textFromError(error: unknown) {
   if (!error) return "Something went wrong.";
   if (typeof error === "string") return error;
@@ -247,6 +261,30 @@ function EyeOffIcon() {
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68M6.6 6.6A13.3 13.3 0 0 0 2 11s3.5 7 10 7a9 9 0 0 0 5.4-1.6" />
       <path d="M14.12 14.12A3 3 0 1 1 9.88 9.88M1 1l22 22" />
+    </svg>
+  );
+}
+
+/** Broom-style sweep icon, used on the "clean up unused images" action. */
+function SweepIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M19 6 9 16" />
+      <path d="M13 20 4 11a3 3 0 0 1 0-4l1-1a3 3 0 0 1 4 0l9 9-3 3a2 2 0 0 1-2 1z" />
+      <path d="M17.5 3.5 21 7" />
+      <path d="M2 22l4-4" />
+    </svg>
+  );
+}
+
+/** Circular refresh/cycle icon, used on the "refresh image cache" action. */
+function RefreshIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 12a9 9 0 0 1-15.3 6.4M3 12a9 9 0 0 1 15.3-6.4" />
+      <path d="M21 4v5h-5M3 20v-5h5" />
     </svg>
   );
 }
@@ -1346,35 +1384,23 @@ export default function AdminSite() {
             <aside className="admin-sidebar">
               <div className="admin-sidebar-block">
                 <div className="admin-small-label">Logged in as</div>
-                <div className="admin-user">{sessionEmail}</div>
+                <div className="admin-user">{sessionEmail || "—"}</div>
               </div>
 
-              <div className="admin-sidebar-block admin-menu-list">
-                <button
-                  type="button"
-                  className={
-                    activeTab === "settings" ? "tab-btn active" : "tab-btn"
-                  }
-                  onClick={() => setActiveTab("settings")}
-                >
-                  Settings
-                </button>
-
-                {(Object.keys(collectionLabels) as AdminCollectionKey[]).map(
-                  (section) => (
-                    <button
-                      type="button"
-                      key={section}
-                      className={
-                        activeTab === section ? "tab-btn active" : "tab-btn"
-                      }
-                      onClick={() => setActiveTab(section)}
-                    >
-                      {collectionLabels[section]}
-                    </button>
-                  ),
-                )}
-              </div>
+              <nav className="admin-sidebar-block admin-nav" aria-label="Admin sections">
+                {sidebarNavItems.map((item) => (
+                  <button
+                    type="button"
+                    key={item.key}
+                    className={
+                      activeTab === item.key ? "nav-btn active" : "nav-btn"
+                    }
+                    onClick={() => setActiveTab(item.key)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
 
               <div className="admin-sidebar-block">
                 <button
@@ -1417,7 +1443,8 @@ export default function AdminSite() {
                       onClick={cleanupUnusedStorage}
                       title="Remove uploaded images that no card or setting currently uses"
                     >
-                      {busy ? "Working..." : "Clean up unused images"}
+                      <SweepIcon />
+                      {busy ? "Working..." : "Clean up images"}
                     </button>
                     <button
                       type="button"
@@ -1426,7 +1453,8 @@ export default function AdminSite() {
                       onClick={refreshImageCacheHeaders}
                       title="Apply the current 7-day cache setting to images uploaded before it was set — a one-time fix"
                     >
-                      {busy ? "Working..." : "Refresh image cache"}
+                      <RefreshIcon />
+                      {busy ? "Working..." : "Refresh cache"}
                     </button>
                     <button
                       type="button"
@@ -1462,7 +1490,71 @@ export default function AdminSite() {
                 )}
               </div>
 
-              {message ? <div className="admin-message">{message}</div> : null}
+              {message ? <div className="admin-message top-gap-sm">{message}</div> : null}
+
+              {activeTab === "settings" ? (
+                <div className="editor-card top-gap-sm">
+                  <div className="editor-card-top">
+                    <strong>Section heading — &quot;About&quot;</strong>
+                    <button
+                      type="button"
+                      className="gold-btn"
+                      disabled={busy}
+                      onClick={saveSettings}
+                    >
+                      {busy ? "Saving..." : "Save heading"}
+                    </button>
+                  </div>
+                  <p className="admin-hint">
+                    The heading shown above the About section on the site.
+                    Portuguese fields are optional.
+                  </p>
+                  <div className="settings-grid top-gap-sm">
+                    <Field
+                      label="Eyebrow"
+                      value={content.settings.aboutEyebrow}
+                      onChange={(v) => updateSetting("aboutEyebrow", v)}
+                    />
+                    <Field
+                      label="Eyebrow (Português)"
+                      value={content.settings.aboutEyebrowPt}
+                      onChange={(v) => updateSetting("aboutEyebrowPt", v)}
+                    />
+                    <div className="span-2">
+                      <Field
+                        label="Title"
+                        value={content.settings.aboutTitle}
+                        onChange={(v) => updateSetting("aboutTitle", v)}
+                      />
+                    </div>
+                    <div className="span-2">
+                      <Field
+                        label="Title (Português)"
+                        value={content.settings.aboutTitlePt}
+                        onChange={(v) => updateSetting("aboutTitlePt", v)}
+                      />
+                    </div>
+                    <div className="span-2">
+                      <Field
+                        label="Description"
+                        value={content.settings.aboutDescription}
+                        onChange={(v) => updateSetting("aboutDescription", v)}
+                        textarea
+                      />
+                    </div>
+                    <div className="span-2">
+                      <Field
+                        label="Description (Português)"
+                        value={content.settings.aboutDescriptionPt}
+                        onChange={(v) =>
+                          updateSetting("aboutDescriptionPt", v)
+                        }
+                        textarea
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : null}
 
               {activeTab === "settings" ? (
                 <div className="settings-card top-gap-sm">

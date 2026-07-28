@@ -285,6 +285,12 @@ alter table public.site_settings add column if not exists mission_pt text not nu
 alter table public.site_settings add column if not exists vision_pt text not null default '';
 alter table public.site_settings add column if not exists focus_pt text not null default '';
 alter table public.site_settings add column if not exists about_pt text not null default '';
+alter table public.site_settings add column if not exists about_eyebrow text not null default '';
+alter table public.site_settings add column if not exists about_title text not null default '';
+alter table public.site_settings add column if not exists about_description text not null default '';
+alter table public.site_settings add column if not exists about_eyebrow_pt text not null default '';
+alter table public.site_settings add column if not exists about_title_pt text not null default '';
+alter table public.site_settings add column if not exists about_description_pt text not null default '';
 alter table public.site_settings add column if not exists services_eyebrow text not null default '';
 alter table public.site_settings add column if not exists services_title text not null default '';
 alter table public.site_settings add column if not exists services_description text not null default '';

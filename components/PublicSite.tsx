@@ -813,9 +813,9 @@ export default function PublicSite() {
         <section id="about" className="section">
           <div className="container">
             <SectionTitle
-              eyebrow={t("aboutEyebrow")}
-              title={t("aboutTitle")}
-              description={t("aboutDescription")}
+              eyebrow={heading(settings.aboutEyebrow, settings.aboutEyebrowPt, "aboutEyebrow")}
+              title={heading(settings.aboutTitle, settings.aboutTitlePt, "aboutTitle")}
+              description={heading(settings.aboutDescription, settings.aboutDescriptionPt, "aboutDescription")}
             />
 
             <div className="about-grid">

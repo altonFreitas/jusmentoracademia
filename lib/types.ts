@@ -31,6 +31,14 @@ export type SiteSettings = {
   focusPt: string;
   aboutPt: string;
 
+  // Editable section headings — About
+  aboutEyebrow: string;
+  aboutTitle: string;
+  aboutDescription: string;
+  aboutEyebrowPt: string;
+  aboutTitlePt: string;
+  aboutDescriptionPt: string;
+
   // Editable section headings for "What we do" (services)
   servicesEyebrow: string;
   servicesTitle: string;
