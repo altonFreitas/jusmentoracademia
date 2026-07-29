@@ -1061,6 +1061,96 @@ export default function AdminSite() {
     }
   }
 
+  const REGISTRATION_COLUMNS = [
+    "created_at",
+    "full_name",
+    "date_of_birth",
+    "gender",
+    "email",
+    "phone",
+    "address",
+    "occupation",
+  ] as const;
+
+  /** Downloads every saved registration as a CSV file (opens fine in
+      Excel/Numbers/Google Sheets). Read-only — does not touch the data. */
+  async function exportRegistrationsCsv() {
+    if (!supabase) return;
+    setBusy(true);
+    setMessage("");
+
+    try {
+      const { data, error } = await supabase
+        .from("registrations")
+        .select(REGISTRATION_COLUMNS.join(","))
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+
+      const rows = (data ?? []) as unknown as Record<string, string>[];
+      if (!rows.length) {
+        setMessage("No registrations to export yet.");
+        return;
+      }
+
+      const escapeCsv = (value: unknown) => {
+        const s = String(value ?? "");
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+
+      const header = REGISTRATION_COLUMNS.join(",");
+      const body = rows
+        .map((row) =>
+          REGISTRATION_COLUMNS.map((col) => escapeCsv(row[col])).join(","),
+        )
+        .join("\n");
+      const csv = `${header}\n${body}`;
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `registrations-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setMessage(`Exported ${rows.length} registration${rows.length === 1 ? "" : "s"}.`);
+    } catch (error) {
+      setMessage(textFromError(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Permanently deletes every saved registration. Meant to be used right
+      after exporting a CSV backup, to keep database storage usage low. */
+  async function deleteAllRegistrations() {
+    if (!supabase) return;
+    const confirmed = window.confirm(
+      "Delete ALL saved registrations? This cannot be undone — export a CSV backup first if you need one.",
+    );
+    if (!confirmed) return;
+
+    setBusy(true);
+    setMessage("");
+
+    try {
+      const { error } = await supabase
+        .from("registrations")
+        .delete()
+        .not("id", "is", null);
+
+      if (error) throw error;
+      setMessage("All registrations deleted.");
+    } catch (error) {
+      setMessage(textFromError(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function updateSetting<K extends keyof SiteSettings>(
     key: K,
     value: SiteSettings[K],
@@ -1552,6 +1642,87 @@ export default function AdminSite() {
                         textarea
                       />
                     </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {activeTab === "settings" ? (
+                <div className="editor-card top-gap-sm">
+                  <div className="editor-card-top">
+                    <strong>Course Registration</strong>
+                  </div>
+                  <p className="admin-hint">
+                    When enabled, a &quot;Course Registration&quot; button
+                    appears in the site header (after the language switch).
+                    Submissions are saved below and a notification email is
+                    sent to your institute email for every registration —
+                    replying to that email goes straight to the registrant.
+                  </p>
+
+                  <div className="top-gap-sm">
+                    <Field
+                      label="Notification email subject"
+                      value={content.settings.registrationEmailSubject}
+                      onChange={(v) =>
+                        updateSetting("registrationEmailSubject", v)
+                      }
+                    />
+                    <p className="admin-hint">
+                      Required before the button can be enabled — used as the
+                      subject line of every registration notification email.
+                    </p>
+                  </div>
+
+                  <label className="registration-toggle top-gap-sm">
+                    <input
+                      type="checkbox"
+                      checked={content.settings.registrationEnabled === "true"}
+                      onChange={(e) => {
+                        if (
+                          e.target.checked &&
+                          !content.settings.registrationEmailSubject.trim()
+                        ) {
+                          setMessage("Define the subject for Email");
+                          return;
+                        }
+                        updateSetting(
+                          "registrationEnabled",
+                          e.target.checked ? "true" : "false",
+                        );
+                      }}
+                    />
+                    <span>
+                      Show the Course Registration button on the public site
+                    </span>
+                  </label>
+
+                  <div className="button-row top-gap-sm">
+                    <button
+                      type="button"
+                      className="gold-btn"
+                      disabled={busy}
+                      onClick={saveSettings}
+                    >
+                      {busy ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      className="ghost-btn"
+                      disabled={busy}
+                      onClick={exportRegistrationsCsv}
+                      title="Download every saved registration as a CSV file (opens in Excel)"
+                    >
+                      Export to Excel (CSV)
+                    </button>
+                    <button
+                      type="button"
+                      className="danger-btn"
+                      disabled={busy}
+                      onClick={deleteAllRegistrations}
+                      title="Permanently delete every saved registration — export first if you need a copy"
+                    >
+                      Delete all registrations
+                    </button>
                   </div>
                 </div>
               ) : null}

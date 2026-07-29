@@ -661,6 +661,11 @@ export default function PublicSite() {
         {lang === "pt" ? <FlagUS /> : <FlagPT />}
         <span>{lang === "pt" ? "EN" : "PT"}</span>
       </button>
+      {settings.registrationEnabled === "true" ? (
+        <a href="/register" className="gold-btn register-btn">
+          {t("courseRegistration")}
+        </a>
+      ) : null}
     </div>
   );
 
@@ -754,6 +759,16 @@ export default function PublicSite() {
                 {t(link.key)}
               </a>
             ))}
+            {settings.registrationEnabled === "true" ? (
+              <a
+                href="/register"
+                className="mobile-nav-register"
+                onClick={() => setMenuOpen(false)}
+                style={stagger(NAV_LINKS.length)}
+              >
+                {t("courseRegistration")}
+              </a>
+            ) : null}
           </nav>
         </div>
       </header>

@@ -12,6 +12,13 @@ export type SiteSettings = {
   address: string;
   addressUrl: string;
   founded: string;
+  // "true" or "false" — controls whether the "Course Registration" button
+  // shows in the public site header. Stored as text to match every other
+  // settings column in this project.
+  registrationEnabled: string;
+  // Subject line for the notification email sent on every registration.
+  // Required before registrationEnabled can be turned on.
+  registrationEmailSubject: string;
   mission: string;
   vision: string;
   focus: string;

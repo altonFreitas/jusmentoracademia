@@ -446,3 +446,49 @@ on public.socials
 for all
 using (public.is_admin())
 with check (public.is_admin());
+
+-- v2.3: Course Registration feature.
+-- Admin-controlled visibility toggle for the public "Course Registration"
+-- header button. Stored as text ("true"/"false") to match every other
+-- settings column in this project.
+alter table public.site_settings add column if not exists registration_enabled text not null default 'false';
+
+-- Subject line for the notification email sent to the institute on every
+-- submission. The admin must set this before the button can be enabled.
+alter table public.site_settings add column if not exists registration_email_subject text not null default '';
+
+-- Submitted registrations. The public can only INSERT (submit their own
+-- form) — never read, edit, or delete anyone's entry, including their own,
+-- once sent. Only admins can view or remove entries, e.g. to export to CSV
+-- and then clear the table to keep storage usage low.
+create table if not exists public.registrations (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  date_of_birth date not null,
+  gender text not null,
+  email text not null,
+  phone text not null,
+  address text not null,
+  occupation text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.registrations enable row level security;
+
+drop policy if exists "public can submit registrations" on public.registrations;
+create policy "public can submit registrations"
+on public.registrations
+for insert
+with check (true);
+
+drop policy if exists "admins read registrations" on public.registrations;
+create policy "admins read registrations"
+on public.registrations
+for select
+using (public.is_admin());
+
+drop policy if exists "admins delete registrations" on public.registrations;
+create policy "admins delete registrations"
+on public.registrations
+for delete
+using (public.is_admin());

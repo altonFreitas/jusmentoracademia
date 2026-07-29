@@ -442,6 +442,22 @@ input[type="file"]:disabled {
   align-items: center;
   gap: 10px;
 }
+
+.register-btn {
+  white-space: nowrap;
+  padding: 12px 20px;
+  font-size: 13px;
+}
+.mobile-nav-register {
+  margin-top: 8px;
+  border-radius: 999px !important;
+  text-align: center;
+  background: var(--grad-gold);
+  color: #1c1607 !important;
+  font-weight: 800;
+  border-bottom: none !important;
+}
+
 .icon-btn,
 .lang-btn {
   border-radius: 13px;
@@ -2028,6 +2044,9 @@ textarea:focus-visible,
   .header-controls {
     margin-left: auto;
   }
+  .register-btn {
+    display: none;
+  }
 }
 @media (min-width: 861px) {
   .mobile-menu {
@@ -2958,4 +2977,121 @@ textarea:focus-visible,
   .cookie-banner {
     animation: none;
   }
+}
+
+
+/* ==========================================================================
+   24. Course Registration form
+   ========================================================================== */
+.reg-article {
+  max-width: 700px;
+}
+.reg-form {
+  display: block;
+}
+.reg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.reg-grid select.form-input {
+  cursor: pointer;
+}
+.reg-field-error {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #a12626;
+}
+
+.reg-review {
+  display: grid;
+  gap: 2px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--hairline);
+  overflow: hidden;
+}
+.reg-review-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  padding: 14px 20px;
+  background: #fff;
+}
+.reg-review-row:nth-child(even) {
+  background: rgba(15, 23, 42, 0.02);
+}
+.reg-review-row dt {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.reg-review-row dd {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e2532;
+  word-break: break-word;
+  text-transform: lowercase;
+}
+.reg-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.reg-result {
+  text-align: center;
+  padding: 32px 0;
+}
+.reg-result-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(140deg, #fdf3cd, #f6e29a);
+  color: var(--gold-deep);
+}
+.reg-result-icon.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+.reg-result-title {
+  margin: 20px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 600;
+  color: #0f172a;
+}
+
+@media (max-width: 640px) {
+  .reg-grid {
+    grid-template-columns: 1fr;
+  }
+  .reg-grid .span-2 {
+    grid-column: auto;
+  }
+  .reg-review-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+[data-theme="dark"] .reg-review-row {
+  background: #141d2e;
+}
+[data-theme="dark"] .reg-review-row:nth-child(even) {
+  background: #101828;
+}
+[data-theme="dark"] .reg-review-row dd {
+  color: #eef2f8;
+}
+[data-theme="dark"] .reg-result-title {
+  color: #eef2f8;
 }

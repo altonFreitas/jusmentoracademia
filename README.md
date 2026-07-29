@@ -122,6 +122,52 @@ Each tab in the dashboard edits one part of the site:
 Click **Save** in each tab to publish. Uploaded images are stored in the `media`
 bucket and served publicly.
 
+# Course Registration feature — file list
+
+Read **README-REGISTRATION.md** first — it has the Gmail App Password setup
+and how to turn the feature on.
+
+## Where each file goes (mirrors your project structure exactly)
+
+**New files:**
+- `app/api/register/route.ts` — validates each submission, lowercases text
+  fields, saves it to Supabase, and emails your institute via Gmail SMTP.
+- `app/register/page.tsx` — the `/register` route.
+- `components/RegistrationForm.tsx` — the form, review screen, and
+  success/error states.
+
+**Replace these existing files:**
+- `package.json` — adds `nodemailer` (+ its types) as a dependency.
+- `.env.example` — documents the 2 new Gmail variables.
+- `app/globals.css` — adds all the form/review/result styling.
+- `components/AdminSite.tsx` — adds the on/off toggle, the required email
+  subject field, and the Export-to-CSV / Delete-all buttons in Settings.
+- `components/PublicSite.tsx` — adds the header + mobile-menu button.
+- `lib/types.ts` — adds `registrationEnabled` and `registrationEmailSubject`.
+- `lib/defaults.ts` — wires both fields into the default/save/load logic.
+- `lib/i18n.ts` — adds every EN + PT label used in the flow.
+- `sql/schema.sql` — adds the 2 new settings columns and the `registrations`
+  table (your primary storage) with its access rules.
+
+## Quick start
+1. Copy all files into your project (matching the paths above).
+2. `npm install` (pulls in `nodemailer`).
+3. Run the new lines in `sql/schema.sql` against your Supabase database
+   (uses `if not exists`, safe to just re-run the whole file).
+4. Follow `README-REGISTRATION.md` to create a Gmail App Password (2
+   minutes, no Google Cloud, no card) and add it to your env vars.
+5. Sign in to `/admin` → Settings → set the email subject → enable **Course
+   Registration**.
+
+## How data flows
+1. Visitor fills the form → reviews → submits.
+2. Server lowercases the text fields, saves the row to Supabase.
+3. Server emails your institute (From: your Gmail, Reply-To: the
+   registrant) — a failure here never blocks the registration itself.
+4. When you're ready, export everything to CSV from the admin panel, then
+   delete the rows to keep Supabase storage minimal.
+
+
 ## 8) Launch
 
 1. Push the project to GitHub.

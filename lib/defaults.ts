@@ -30,6 +30,8 @@ export const defaultSettings: SiteSettings = {
   address: "Surikmas, Díli, Timor-Leste",
   addressUrl: "",
   founded: "2024",
+  registrationEnabled: "false",
+  registrationEmailSubject: "",
   mission:
     "To make quality legal education, practical training, and advocacy available to the people who need it most, turning legal knowledge into everyday confidence.",
   vision:
@@ -325,6 +327,8 @@ export function dbSettingsToSiteSettings(
     address: String(row.address ?? defaultSettings.address),
     addressUrl: String(row.address_url ?? ""),
     founded: String(row.founded ?? defaultSettings.founded),
+    registrationEnabled: String(row.registration_enabled ?? "false"),
+    registrationEmailSubject: String(row.registration_email_subject ?? ""),
     mission: String(row.mission ?? defaultSettings.mission),
     vision: String(row.vision ?? defaultSettings.vision),
     focus: String(row.focus ?? defaultSettings.focus),
@@ -420,6 +424,8 @@ export function siteSettingsToDbRow(settings: SiteSettings) {
     address: settings.address,
     address_url: settings.addressUrl,
     founded: settings.founded,
+    registration_enabled: settings.registrationEnabled,
+    registration_email_subject: settings.registrationEmailSubject,
     mission: settings.mission,
     vision: settings.vision,
     focus: settings.focus,
