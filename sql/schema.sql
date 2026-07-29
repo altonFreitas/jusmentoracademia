@@ -470,7 +470,6 @@ create table if not exists public.registrations (
   phone text not null,
   address text not null,
   occupation text not null,
-  program_title text not null default '',
   created_at timestamptz not null default now()
 );
 
@@ -493,14 +492,3 @@ create policy "admins delete registrations"
 on public.registrations
 for delete
 using (public.is_admin());
-
--- v2.4: Per-program registration scheduling.
--- Admins can set a start/end date-time per program so registration opens
--- and closes automatically, and can manually force it open or closed at
--- any time — the manual override always takes priority. registration_start
--- and registration_end are stored as UTC ISO timestamps (as text, matching
--- every other column in this project); registration_override is one of
--- '', 'open', or 'closed'.
-alter table public.programs add column if not exists registration_start text not null default '';
-alter table public.programs add column if not exists registration_end text not null default '';
-alter table public.programs add column if not exists registration_override text not null default '';

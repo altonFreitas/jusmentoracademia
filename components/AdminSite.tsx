@@ -10,11 +10,6 @@ import {
   siteSettingsToDbRow,
 } from "@/lib/defaults";
 import { getSupabaseBrowserClient, hasSupabaseEnv } from "@/lib/supabase";
-import {
-  isRegistrationOpen,
-  isoToLocalInput,
-  localInputToIso,
-} from "@/lib/registration";
 import type {
   AdminCollectionKey,
   SiteContent,
@@ -528,88 +523,6 @@ function IconPickerField({
           </div>
         </div>
       ) : null}
-    </div>
-  );
-}
-
-/** Per-program registration scheduling: start/end date-time pickers plus a
-    live-computed open/closed toggle. Toggling the checkbox directly sets a
-    manual override that takes priority over the schedule; a "follow
-    schedule instead" link clears that override and lets the dates decide
-    again. The checkbox always reflects the true current status — computed
-    fresh on every render, not just whatever was last saved — so reopening
-    this panel after time has passed shows the up-to-date state. */
-function RegistrationScheduleField({
-  start,
-  end,
-  override,
-  onChangeStart,
-  onChangeEnd,
-  onChangeOverride,
-}: {
-  start: string;
-  end: string;
-  override: string;
-  onChangeStart: (iso: string) => void;
-  onChangeEnd: (iso: string) => void;
-  onChangeOverride: (value: string) => void;
-}) {
-  const isOpen = isRegistrationOpen(start, end, override);
-
-  return (
-    <div className="span-2 reg-schedule">
-      <span className="field-label">Registration</span>
-
-      <div className="reg-schedule-status top-gap-xs">
-        <label className="registration-toggle">
-          <input
-            type="checkbox"
-            checked={isOpen}
-            onChange={(e) =>
-              onChangeOverride(e.target.checked ? "open" : "closed")
-            }
-          />
-          <span>
-            {isOpen ? "Registration is open" : "Registration is closed"}
-          </span>
-        </label>
-        {override ? (
-          <button
-            type="button"
-            className="reg-schedule-clear"
-            onClick={() => onChangeOverride("")}
-          >
-            Follow schedule instead
-          </button>
-        ) : null}
-      </div>
-
-      <div className="settings-grid top-gap-sm">
-        <div>
-          <span className="field-label">Registration start</span>
-          <input
-            type="datetime-local"
-            className="form-input top-gap-xs"
-            value={isoToLocalInput(start)}
-            onChange={(e) => onChangeStart(localInputToIso(e.target.value))}
-          />
-        </div>
-        <div>
-          <span className="field-label">Registration end</span>
-          <input
-            type="datetime-local"
-            className="form-input top-gap-xs"
-            value={isoToLocalInput(end)}
-            onChange={(e) => onChangeEnd(localInputToIso(e.target.value))}
-          />
-        </div>
-      </div>
-
-      <p className="admin-hint">
-        {override
-          ? `Manually forced ${override === "open" ? "open" : "closed"} — this overrides the schedule above until you clear it.`
-          : "No manual override — registration opens and closes automatically based on the dates above. Times are in Dili (Timor-Leste) local time."}
-      </p>
     </div>
   );
 }
@@ -1667,7 +1580,7 @@ export default function AdminSite() {
                 )}
               </div>
 
-              {message ? <div className="admin-message top-gap-sm">{message}</div> : null}
+              {message ? <div className="admin-message">{message}</div> : null}
 
               {activeTab === "settings" ? (
                 <div className="editor-card top-gap-sm">
@@ -2286,40 +2199,6 @@ export default function AdminSite() {
 
                               return cells;
                             })}
-
-                            {activeTab === "programs" ? (
-                              <RegistrationScheduleField
-                                start={String(record.registration_start ?? "")}
-                                end={String(record.registration_end ?? "")}
-                                override={String(
-                                  record.registration_override ?? "",
-                                )}
-                                onChangeStart={(iso) =>
-                                  updateCollectionItem(
-                                    activeTab,
-                                    index,
-                                    "registration_start",
-                                    iso,
-                                  )
-                                }
-                                onChangeEnd={(iso) =>
-                                  updateCollectionItem(
-                                    activeTab,
-                                    index,
-                                    "registration_end",
-                                    iso,
-                                  )
-                                }
-                                onChangeOverride={(value) =>
-                                  updateCollectionItem(
-                                    activeTab,
-                                    index,
-                                    "registration_override",
-                                    value,
-                                  )
-                                }
-                              />
-                            ) : null}
                           </div>
                         </div>
                       );

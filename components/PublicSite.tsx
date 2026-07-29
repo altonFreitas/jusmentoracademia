@@ -17,7 +17,6 @@ import {
   logoSrc,
 } from "@/lib/defaults";
 import { getSupabaseBrowserClient, hasSupabaseEnv } from "@/lib/supabase";
-import { isRegistrationOpen } from "@/lib/registration";
 import { tr, loc, type UiKey } from "@/lib/i18n";
 import type { Lang, SiteContent, Theme } from "@/lib/types";
 import { CookiePreferencesLink } from "@/components/CookieConsent";
@@ -826,7 +825,7 @@ export default function PublicSite() {
           </div>
         </section>
 
-        <section id="about" className="section about-section">
+        <section id="about" className="section">
           <div className="container">
             <SectionTitle
               eyebrow={heading(settings.aboutEyebrow, settings.aboutEyebrowPt, "aboutEyebrow")}
@@ -932,43 +931,19 @@ export default function PublicSite() {
               <SkeletonGrid count={3} columns="three-grid" lines={3} />
             ) : (
               <Carousel className="top-gap-lg" trackClassName="three">
-                {content.programs.map((program, index) => {
-                  const progOpen = isRegistrationOpen(
-                    String((program as Record<string, unknown>).registration_start ?? ""),
-                    String((program as Record<string, unknown>).registration_end ?? ""),
-                    String((program as Record<string, unknown>).registration_override ?? ""),
-                  );
-                  const programTitle = L(program, "title");
-                  return (
-                    <MotionCard
-                      className="card dark reveal"
-                      key={(program.id || program.title) + index}
-                      style={stagger(index)}
-                    >
-                      <div className="card-body">
-                        <div className="pill">{L(program, "format")}</div>
-                        <div className="feature-title light-text">{programTitle}</div>
-                        <div className="feature-text light-text">{L(program, "description")}</div>
-                        <div
-                          className={
-                            progOpen ? "program-reg-status is-open" : "program-reg-status"
-                          }
-                        >
-                          <span className="program-reg-dot" aria-hidden="true" />
-                          {progOpen ? t("programRegOpen") : t("programRegClosed")}
-                        </div>
-                        {progOpen ? (
-                          <a
-                            href={`/register?program=${encodeURIComponent(programTitle)}`}
-                            className="quick-btn top-gap-sm"
-                          >
-                            {t("programRegNow")} <span aria-hidden="true">→</span>
-                          </a>
-                        ) : null}
-                      </div>
-                    </MotionCard>
-                  );
-                })}
+                {content.programs.map((program, index) => (
+                  <MotionCard
+                    className="card dark reveal"
+                    key={(program.id || program.title) + index}
+                    style={stagger(index)}
+                  >
+                    <div className="card-body">
+                      <div className="pill">{L(program, "format")}</div>
+                      <div className="feature-title light-text">{L(program, "title")}</div>
+                      <div className="feature-text light-text">{L(program, "description")}</div>
+                    </div>
+                  </MotionCard>
+                ))}
               </Carousel>
             )}
           </div>

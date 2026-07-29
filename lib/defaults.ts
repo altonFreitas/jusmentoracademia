@@ -18,16 +18,16 @@ export const logoSrc = "/logo.png";
 export const defaultSettings: SiteSettings = {
   name: "JusMentor Academia",
   shortName: "JMA",
-  heroLabel: "Legal education institute · Díli, Timor-Leste",
-  heroTitle: "Empowering communities through legal education, advocacy, and modern learning.",
+  heroLabel: "Legal education institute · Dili, Timor-Leste",
+  heroTitle: "Making the law understandable, practical, and within reach for every community.",
   heroDescription:
-    "JusMentor Academia is a legal education institute in Díli, Timor-Leste. Through courses, seminars, and advocacy, we help students, youth, and communities understand their rights and build a stronger culture of justice.",
+    "JusMentor Academia is a legal education institute in Dili, Timor-Leste. Through courses, seminars, and advocacy, we help students, youth, and communities understand their rights and build a stronger culture of justice.",
   heroImage: "",
   tagline: "Legal Education · Advocacy · Training · Community Empowerment",
   email: "jusmentoracademia@gmail.com",
   phone: "+670 7511 4252",
   whatsapp: "67075114252",
-  address: "Surikmas, Díli, Timor-Leste",
+  address: "Surikmas, Dili, Timor-Leste",
   addressUrl: "",
   founded: "2024",
   registrationEnabled: "false",
@@ -186,7 +186,7 @@ export const defaultEvents: EventItem[] = [
   {
     title: "Legal Awareness Seminar",
     date_label: "Monthly",
-    location: "Díli, Timor-Leste",
+    location: "Dili, Timor-Leste",
     summary:
       "An open, public seminar on rights, responsibilities, and the everyday law that shapes our communities.",
   },
@@ -209,7 +209,7 @@ export const defaultEvents: EventItem[] = [
 export const defaultTestimonials: TestimonialItem[] = [
   {
     name: "Course participant",
-    role: "Díli",
+    role: "Dili",
     quote:
       "The lessons made legal ideas feel simple and useful. For the first time, I understood rights I never knew I had.",
   },

@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { logoSrc, defaultSettings } from "@/lib/defaults";
 import { tr, type UiKey } from "@/lib/i18n";
 import type { Lang } from "@/lib/types";
@@ -39,9 +38,6 @@ function isValidEmail(email: string) {
 }
 
 export default function RegistrationForm() {
-  const searchParams = useSearchParams();
-  const programTitle = (searchParams.get("program") || "").trim();
-
   const [lang, setLang] = useState<Lang>("en");
   const [step, setStep] = useState<Step>("form");
   const [data, setData] = useState<FormData>(EMPTY_FORM);
@@ -106,7 +102,7 @@ export default function RegistrationForm() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, program: programTitle }),
+        body: JSON.stringify(data),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -149,9 +145,6 @@ export default function RegistrationForm() {
       <main className="container legal-main">
         <article className="legal-article reg-article">
           <p className="legal-eyebrow">{t("courseRegistration")}</p>
-          {programTitle ? (
-            <p className="reg-program-name">{programTitle}</p>
-          ) : null}
 
           {step === "form" ? (
             <>
@@ -227,12 +220,6 @@ export default function RegistrationForm() {
             <>
               <p className="legal-updated">{t("regReviewIntro")}</p>
               <dl className="reg-review top-gap-lg">
-                {programTitle ? (
-                  <div className="reg-review-row">
-                    <dt>{t("courseRegistration")}</dt>
-                    <dd>{programTitle}</dd>
-                  </div>
-                ) : null}
                 {fields.map((field) => (
                   <div className="reg-review-row" key={field.key}>
                     <dt>{field.label}</dt>

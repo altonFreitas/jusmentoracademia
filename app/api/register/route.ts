@@ -14,9 +14,6 @@ type RegistrationPayload = {
   phone?: string;
   address?: string;
   occupation?: string;
-  /** Which program this registration is for — optional, sent when someone
-      registers via a specific Program's "Register now" link. */
-  program?: string;
   /** Honeypot — a real visitor never fills this in. Bots that auto-fill
       every field on a form usually do. */
   website?: string;
@@ -78,7 +75,6 @@ export async function POST(request: Request) {
     phone: String(body.phone).trim().toLowerCase(),
     address: String(body.address).trim().toLowerCase(),
     occupation: String(body.occupation).trim().toLowerCase(),
-    program: (body.program || "").trim(),
   };
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -100,7 +96,6 @@ export async function POST(request: Request) {
     phone: record.phone,
     address: record.address,
     occupation: record.occupation,
-    program_title: record.program,
   });
 
   if (insertError) {
@@ -139,7 +134,6 @@ export async function POST(request: Request) {
       });
 
       const bodyLines = [
-        ...(record.program ? [`Program: ${record.program}`] : []),
         `Full Name: ${record.fullName}`,
         `Date of Birth: ${record.dateOfBirth}`,
         `Gender: ${record.gender}`,
@@ -156,7 +150,7 @@ export async function POST(request: Request) {
         from: `"JusMentor Academia" <${gmailUser}>`,
         to: institutionEmail,
         replyTo: record.email,
-        subject: record.program ? `${subject} — ${record.program}` : subject,
+        subject,
         text: bodyLines.join("\n"),
         html: `<p>${bodyLines.join("<br>")}</p>`,
       });
@@ -165,16 +159,13 @@ export async function POST(request: Request) {
       // through. A failure here is logged separately and never blocks the
       // institute notification above or the saved registration itself.
       try {
-        const programLine = record.program
-          ? ` for ${record.program}`
-          : "";
         await transporter.sendMail({
           from: `"JusMentor Academia" <${gmailUser}>`,
           to: record.email,
           replyTo: institutionEmail,
           subject: "Registration received — JusMentor Academia",
-          text: `Hi ${record.fullName},\n\nThank you for registering${programLine} with JusMentor Academia. We'll be in touch soon.\n\n— JusMentor Academia`,
-          html: `<p>Hi ${record.fullName},</p><p>Thank you for registering${programLine} with JusMentor Academia. We'll be in touch soon.</p><p>— JusMentor Academia</p>`,
+          text: `Hi ${record.fullName},\n\nThank you for registering with JusMentor Academia. We'll be in touch soon.\n\n— JusMentor Academia`,
+          html: `<p>Hi ${record.fullName},</p><p>Thank you for registering with JusMentor Academia. We'll be in touch soon.</p><p>— JusMentor Academia</p>`,
         });
       } catch (error) {
         console.error("Registrant confirmation email failed:", error);

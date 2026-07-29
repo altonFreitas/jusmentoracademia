@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import RegistrationForm from "@/components/RegistrationForm";
 
 export const metadata: Metadata = {
@@ -10,9 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  return (
-    <Suspense fallback={null}>
-      <RegistrationForm />
-    </Suspense>
-  );
+  return <RegistrationForm />;
 }
