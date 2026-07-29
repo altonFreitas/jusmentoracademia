@@ -310,6 +310,7 @@ input[type="file"]:disabled {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  padding-block: 14px;
 }
 
 .admin-header-row {
@@ -337,8 +338,6 @@ input[type="file"]:disabled {
 .brand-logo,
 .footer-logo,
 .admin-logo {
-  width: 52px;
-  height: 52px;
   border-radius: 50%;
   background: white;
   border: 1px solid var(--line);
@@ -346,6 +345,15 @@ input[type="file"]:disabled {
   object-fit: contain;
   box-shadow: 0 6px 18px -8px rgba(15, 23, 42, 0.35);
   transition: transform 0.5s var(--spring), box-shadow 0.5s var(--ease);
+}
+.brand-logo {
+  width: 40px;
+  height: 40px;
+}
+.footer-logo,
+.admin-logo {
+  width: 52px;
+  height: 52px;
 }
 .brand:hover .brand-logo {
   transform: rotate(-4deg) scale(1.04);
@@ -1564,8 +1572,15 @@ blockquote {
 .field-input:focus,
 .form-input:focus {
   border-color: var(--gold);
-  box-shadow: 0 0 0 4px rgba(193, 154, 46, 0.16);
+  box-shadow: 0 0 0 2px rgba(193, 154, 46, 0.22);
   background: #fff;
+}
+/* The generic input:focus-visible rule further down adds its own outline —
+   these already have a purpose-built ring above, so skip the extra one to
+   avoid two focus indicators stacking into one thick, chunky border. */
+.field-input:focus-visible,
+.form-input:focus-visible {
+  outline: none;
 }
 .field-textarea {
   min-height: 150px;
@@ -2077,6 +2092,11 @@ textarea:focus-visible,
 [data-theme="dark"] .page-shell .card.dark {
   background: linear-gradient(180deg, #0c1524 0%, #0a1120 100%);
   border-color: rgba(255, 255, 255, 0.06);
+}
+[data-theme="dark"] .page-shell .contact-center.card.dark {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 [data-theme="dark"] .page-shell .card:not(.contact-center):hover {

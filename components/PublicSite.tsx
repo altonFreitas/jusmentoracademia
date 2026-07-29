@@ -710,7 +710,7 @@ export default function PublicSite() {
       <header className={scrolled ? "topbar is-scrolled" : "topbar"}>
         <div className="container topbar-inner">
           <a href="#top" className="brand" aria-label={`${settings.name} home`}>
-            <img src={logoSrc} alt="" className="brand-logo" width={52} height={52} />
+            <img src={logoSrc} alt="" className="brand-logo" width={40} height={40} />
             <span className="brand-text">
               <span className="brand-name">{settings.shortName}</span>
               <span className="brand-sub">{settings.name}</span>
