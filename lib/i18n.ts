@@ -55,7 +55,7 @@ export const ui = {
     heroGetInTouch: "Get in touch",
     heroFounded: "Founded",
     heroBasedIn: "Based in",
-    heroBasedInValue: "Dili",
+    heroBasedInValue: "Díli",
     heroFocus: "Focus",
     heroFocusValue: "Legal education",
     instituteProfile: "Institute profile",
