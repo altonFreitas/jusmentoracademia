@@ -1426,6 +1426,32 @@ blockquote {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.program-reg-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #9aa5b5;
+}
+.program-reg-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6b7280;
+  flex: 0 0 auto;
+}
+.program-reg-status.is-open {
+  color: var(--gold-2);
+}
+.program-reg-status.is-open .program-reg-dot {
+  background: var(--gold-2);
+  box-shadow: 0 0 8px rgba(230, 199, 102, 0.7);
+}
+
 /* --------------------------------------------------------------------------
    10. Bands
    -------------------------------------------------------------------------- */
@@ -2451,6 +2477,49 @@ textarea:focus-visible,
   line-height: 1.5;
   color: #7c8698;
 }
+.registration-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: #e5e7eb;
+}
+.registration-toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+/* Per-program registration scheduling (admin) */
+.reg-schedule {
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  margin-top: 4px;
+}
+.reg-schedule-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.reg-schedule-clear {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.reg-schedule-clear:hover {
+  color: #fff;
+}
 .image-field {
   display: block;
 }
@@ -2986,6 +3055,13 @@ textarea:focus-visible,
 .reg-article {
   max-width: 700px;
 }
+.reg-program-name {
+  margin: 10px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 2.4vw, 26px);
+  font-weight: 600;
+  color: #0f172a;
+}
 .reg-form {
   display: block;
 }
@@ -3093,5 +3169,8 @@ textarea:focus-visible,
   color: #eef2f8;
 }
 [data-theme="dark"] .reg-result-title {
+  color: #eef2f8;
+}
+[data-theme="dark"] .reg-program-name {
   color: #eef2f8;
 }

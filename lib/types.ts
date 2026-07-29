@@ -138,6 +138,11 @@ export type ProgramItem = {
   format_pt?: string;
   description_pt?: string;
   sort_order?: number;
+  // Registration scheduling — see lib/registration.ts for how these three
+  // combine into a single open/closed status.
+  registration_start?: string; // UTC ISO string, or "" if unset
+  registration_end?: string; // UTC ISO string, or "" if unset
+  registration_override?: string; // "" | "open" | "closed"
 };
 
 export type TeamItem = {

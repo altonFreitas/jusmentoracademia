@@ -168,6 +168,82 @@ and how to turn the feature on.
    delete the rows to keep Supabase storage minimal.
 
 
+# Per-program registration scheduling — file list
+
+## Where each file goes (mirrors your project structure)
+
+**New files:**
+- `lib/registration.ts` — the shared logic. `isRegistrationOpen(start, end, override)`
+  is the single source of truth, used by both the admin panel and the
+  public site so they always agree.
+- No new pages — `app/register/page.tsx` already existed, just updated (see below).
+
+**Replace these existing files:**
+- `lib/types.ts` — adds 3 fields to `ProgramItem`.
+- `lib/i18n.ts` — adds "Registration open/closed/Register now" in EN + PT.
+- `sql/schema.sql` — adds 3 columns to `programs`, 1 column to `registrations`.
+- `components/AdminSite.tsx` — adds the schedule/override UI per Program.
+  **Also fixes a real bug I found**: `.registration-toggle` CSS was
+  completely missing from your file, so your existing site-wide
+  registration checkbox was likely unstyled — that's restored now too.
+- `components/PublicSite.tsx` — Program cards show a live status badge and
+  a "Register now" link when open.
+- `components/RegistrationForm.tsx` — reads `?program=` from the URL,
+  shows it, includes it in the submission.
+- `app/register/page.tsx` — wrapped in `<Suspense>` (required by Next.js
+  whenever a page reads URL query params like this one now does).
+- `app/api/register/route.ts` — saves and emails the program name too.
+- `app/globals.css` — all the new styling, plus that restored
+  `.registration-toggle` fix.
+
+## Required: run the new SQL
+```sql
+alter table public.programs add column if not exists registration_start text not null default '';
+alter table public.programs add column if not exists registration_end text not null default '';
+alter table public.programs add column if not exists registration_override text not null default '';
+alter table public.registrations add column if not exists program_title text not null default '';
+```
+(Already appended to `sql/schema.sql` too — safe to just re-run the whole
+file, everything uses `if not exists`.)
+
+## How it works
+
+**No cron job, no background worker.** Instead of trying to flip a stored
+"is open" boolean at the exact scheduled moment (which needs paid
+infrastructure and is never perfectly on time), the open/closed status is
+**computed fresh every time it's read** — when the admin panel loads, and
+when a visitor loads the public site. This is simpler, free on any hosting
+tier, and just as accurate, since the only moment the status actually
+matters is the moment someone is looking at it.
+
+**Per program, in the admin panel (Programs tab):**
+- A checkbox showing the live current status. Toggling it directly sets a
+  **manual override** — takes priority over the schedule immediately, works
+  even with no dates set at all.
+- A **"Follow schedule instead"** link appears once an override is set,
+  clearing it so the dates take over deciding again.
+- Two date/time pickers for **Registration start** and **Registration
+  end**. Leave End blank for "stays open indefinitely once started."
+- Times are treated as **Dili (Timor-Leste) local time**, stored internally
+  as UTC so the open/closed status is correct for every visitor regardless
+  of their own timezone.
+
+**On the public site:** each Program card shows a small status badge
+("Registration open" / "Registration closed"). When open, a **"Register
+now"** button appears, linking to `/register?program=<that program's
+title>` — which pre-fills the registration flow with which program it's
+for, and includes that in both the Supabase row and both notification
+emails.
+
+## One thing worth trying after you deploy
+Set a Program's start time to a couple of minutes in the future, leave the
+override blank, and refresh the public site before and after that time
+passes — you should see the badge and Register button appear automatically,
+with no admin action needed.
+
+
+
+
 ## 8) Launch
 
 1. Push the project to GitHub.
