@@ -519,3 +519,32 @@ alter table public.admin_totp enable row level security;
 -- authenticated roles on purpose — this table is only ever touched through
 -- server-side API routes using the service role key, which bypasses RLS.
 
+-- ---------------------------------------------------------------------------
+-- Rate limiting store, shared across any endpoint that needs it (currently
+-- just /api/register). Uses `scope` so different endpoints can have their
+-- own independent limits without colliding.
+--
+-- Deliberately kept in Supabase rather than in-memory: serverless functions
+-- (Vercel etc.) spin up fresh, isolated instances per request, so an
+-- in-process counter would not reliably catch abuse spread across
+-- instances. A shared row-based store does.
+--
+-- Same lockdown as admin_totp above — no anon/authenticated policies,
+-- service role only.
+-- ---------------------------------------------------------------------------
+create table if not exists public.rate_limit_attempts (
+  id bigint generated always as identity primary key,
+  scope text not null,
+  ip text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists rate_limit_attempts_scope_ip_created_idx
+  on public.rate_limit_attempts (scope, ip, created_at);
+
+alter table public.rate_limit_attempts enable row level security;
+
+-- No select/insert/update/delete policies are defined for anon or
+-- authenticated roles on purpose — service role only, same reasoning as
+-- admin_totp above.
+

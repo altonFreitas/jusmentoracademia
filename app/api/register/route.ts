@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 // nodemailer needs Node's net/tls modules, so this route must run on the
 // Node.js runtime (not the Edge runtime).
@@ -33,7 +34,43 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+/** Escapes user-supplied text before it's interpolated into an HTML email
+    body, so a registrant typing e.g. `<b>` or `&` in their name can't alter
+    the email's markup or inject unexpected content. */
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function POST(request: Request) {
+  // Rate limit first, before doing any work — every hit counts, honeypot
+  // or not, so scripted abuse can't dodge the counter by varying the
+  // payload to fail validation on purpose. Two windows: a tight burst
+  // limit to stop rapid-fire spam, and a looser daily cap to stop a slow
+  // drip of automated submissions spread out to evade the burst limit.
+  const ip = getClientIp(request);
+  const rateLimit = await checkRateLimit("register", ip, [
+    { windowMinutes: 10, max: 3 },
+    { windowMinutes: 24 * 60, max: 10 },
+  ]);
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        error:
+          "Too many registration attempts from this connection. Please wait a while and try again.",
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
+    );
+  }
+
   let body: RegistrationPayload;
   try {
     body = await request.json();
@@ -144,6 +181,15 @@ export async function POST(request: Request) {
         `Home Address: ${record.address}`,
         `Current Occupation: ${record.occupation}`,
       ];
+      const bodyLinesHtml = [
+        `Full Name: ${escapeHtml(record.fullName)}`,
+        `Date of Birth: ${escapeHtml(record.dateOfBirth)}`,
+        `Gender: ${escapeHtml(record.gender)}`,
+        `Email: ${escapeHtml(record.email)}`,
+        `Phone: ${escapeHtml(record.phone)}`,
+        `Home Address: ${escapeHtml(record.address)}`,
+        `Current Occupation: ${escapeHtml(record.occupation)}`,
+      ];
 
       // Email 1 — to the institute, notifying them of the new registration.
       // Reply-To is the registrant, so hitting Reply in Gmail goes straight
@@ -154,7 +200,7 @@ export async function POST(request: Request) {
         replyTo: record.email,
         subject,
         text: bodyLines.join("\n"),
-        html: `<p>${bodyLines.join("<br>")}</p>`,
+        html: `<p>${bodyLinesHtml.join("<br>")}</p>`,
       });
 
       // Email 2 — to the registrant, confirming their submission went
@@ -167,7 +213,7 @@ export async function POST(request: Request) {
           replyTo: institutionEmail,
           subject: "Registration received — JusMentor Academia",
           text: `Hi ${record.fullName},\n\nThank you for registering with JusMentor Academia. We'll be in touch soon.\n\n— JusMentor Academia`,
-          html: `<p>Hi ${record.fullName},</p><p>Thank you for registering with JusMentor Academia. We'll be in touch soon.</p><p>— JusMentor Academia</p>`,
+          html: `<p>Hi ${escapeHtml(record.fullName)},</p><p>Thank you for registering with JusMentor Academia. We'll be in touch soon.</p><p>— JusMentor Academia</p>`,
         });
       } catch (error) {
         console.error("Registrant confirmation email failed:", error);
