@@ -223,7 +223,7 @@ export default function RegistrationForm() {
                 {fields.map((field) => (
                   <div className="reg-review-row" key={field.key}>
                     <dt>{field.label}</dt>
-                    <dd>
+                    <dd className={field.key === "email" ? "reg-review-value-natural" : undefined}>
                       {field.key === "gender"
                         ? genderOptions.find((o) => o.value === data.gender)?.label
                         : data[field.key]}

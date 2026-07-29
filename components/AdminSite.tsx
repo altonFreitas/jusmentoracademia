@@ -547,9 +547,38 @@ export default function AdminSite() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+
+  // Two-factor authentication (TOTP) — Google Authenticator, Microsoft
+  // Authenticator, or any other standard authenticator app.
+  const [totpStage, setTotpStage] = useState<
+    "idle" | "checking" | "setup" | "verify" | "verified"
+  >("idle");
+  const [totpBusy, setTotpBusy] = useState(false);
+  const [totpMessage, setTotpMessage] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [manualEntryKey, setManualEntryKey] = useState("");
 
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const logoutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const exportMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!exportMenuOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        exportMenuRef.current &&
+        !exportMenuRef.current.contains(event.target as Node)
+      ) {
+        setExportMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [exportMenuOpen]);
 
   function clearLogoutTimer() {
     if (logoutTimeoutRef.current) {
@@ -572,6 +601,7 @@ export default function AdminSite() {
     setLoggedIn(false);
     setIsAdmin(false);
     setSessionEmail("");
+    resetTwoFactorState();
     setMessage("Session expired. Please sign in again.");
     window.location.href = "/admin";
   }
@@ -740,7 +770,7 @@ export default function AdminSite() {
 
     const {
       data: { subscription },
-    } = client.auth.onAuthStateChange((_event, nextSession) => {
+    } = client.auth.onAuthStateChange((event, nextSession) => {
       if (!mounted) return;
 
       setLoggedIn(Boolean(nextSession));
@@ -764,9 +794,15 @@ export default function AdminSite() {
         startLogoutTimer(expiryAt);
         setAuthLoading(false);
 
-        setTimeout(() => {
-          if (mounted) void loadRoleAndContent(nextSession.user.id);
-        }, 0);
+        // Token refreshes fire this same event on a timer — only re-run the
+        // admin role + two-factor check for an actual new sign-in, so an
+        // already-verified admin isn't asked for a fresh code every time
+        // Supabase silently refreshes the access token in the background.
+        if (event === "SIGNED_IN") {
+          setTimeout(() => {
+            if (mounted) void loadRoleAndContent(nextSession.user.id);
+          }, 0);
+        }
       } else {
         clearLogoutTimer();
         localStorage.removeItem(ADMIN_EXPIRY_KEY);
@@ -781,6 +817,120 @@ export default function AdminSite() {
       clearLogoutTimer();
     };
   }, [supabase]);
+
+  async function getAccessToken(): Promise<string | null> {
+    if (!supabase) return null;
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token || null;
+  }
+
+  function resetTwoFactorState() {
+    setTotpStage("idle");
+    setTotpBusy(false);
+    setTotpMessage("");
+    setTotpCode("");
+    setQrDataUrl("");
+    setManualEntryKey("");
+  }
+
+  /** Runs right after Supabase confirms the account is an admin. Checks
+      whether 2FA is already enabled (→ ask for a code) or not (→ start
+      enrollment and show a QR code). Site content only loads once the
+      code is verified, in verifyTwoFactorCode below. */
+  async function checkTwoFactor(userEmail: string) {
+    setTotpStage("checking");
+    setTotpMessage("");
+
+    const token = await getAccessToken();
+    if (!token) {
+      setTotpStage("idle");
+      return;
+    }
+
+    try {
+      const statusRes = await fetch("/api/admin/totp/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      const statusJson = await statusRes.json().catch(() => ({}));
+
+      if (!statusRes.ok) {
+        setTotpMessage(statusJson?.error || "Could not check two-factor status.");
+        setTotpStage("idle");
+        return;
+      }
+
+      if (statusJson.enabled) {
+        setTotpStage("verify");
+        return;
+      }
+
+      const setupRes = await fetch("/api/admin/totp/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ email: userEmail }),
+      });
+      const setupJson = await setupRes.json().catch(() => ({}));
+
+      if (!setupRes.ok) {
+        setTotpMessage(setupJson?.error || "Could not start two-factor setup.");
+        setTotpStage("idle");
+        return;
+      }
+
+      setQrDataUrl(setupJson.qrDataUrl || "");
+      setManualEntryKey(setupJson.manualEntryKey || "");
+      setTotpStage("setup");
+    } catch (error) {
+      setTotpMessage(textFromError(error));
+      setTotpStage("idle");
+    }
+  }
+
+  async function verifyTwoFactorCode() {
+    const code = totpCode.trim();
+    if (!/^\d{6}$/.test(code)) {
+      setTotpMessage("Enter the 6-digit code from your authenticator app.");
+      return;
+    }
+
+    setTotpBusy(true);
+    setTotpMessage("");
+
+    const token = await getAccessToken();
+    if (!token) {
+      setTotpBusy(false);
+      return;
+    }
+
+    try {
+      const mode = totpStage === "setup" ? "setup" : "login";
+      const res = await fetch("/api/admin/totp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ code, mode }),
+      });
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setTotpMessage(json?.error || "Invalid or expired code.");
+        return;
+      }
+
+      setTotpCode("");
+      setTotpStage("verified");
+      setMessage(
+        mode === "setup"
+          ? "Two-factor authentication enabled. Signed in as admin."
+          : "Signed in as admin.",
+      );
+      await loadContent();
+    } catch (error) {
+      setTotpMessage(textFromError(error));
+    } finally {
+      setTotpBusy(false);
+    }
+  }
 
   async function loadRoleAndContent(userId: string) {
     if (!supabase) return;
@@ -801,8 +951,7 @@ export default function AdminSite() {
     setIsAdmin(role);
 
     if (role) {
-      await loadContent();
-      setMessage("Signed in as admin.");
+      await checkTwoFactor(profileRes.data?.email || sessionEmail);
     } else {
       setMessage(
         profileRes.data?.email
@@ -926,6 +1075,7 @@ export default function AdminSite() {
     setLoggedIn(false);
     setIsAdmin(false);
     setSessionEmail("");
+    resetTwoFactorState();
     setMessage("Signed out.");
     window.location.href = "/admin";
   }
@@ -1072,6 +1222,45 @@ export default function AdminSite() {
     "occupation",
   ] as const;
 
+  const REGISTRATION_HEADERS = [
+    "Submitted",
+    "Full name",
+    "Date of birth",
+    "Gender",
+    "Email",
+    "Phone",
+    "Address",
+    "Occupation",
+  ] as const;
+
+  /** Fetches every saved registration, read-only. Shared by every export
+      format below so they all stay in sync. */
+  async function fetchRegistrationRows() {
+    if (!supabase) return null;
+
+    const { data, error } = await supabase
+      .from("registrations")
+      .select(REGISTRATION_COLUMNS.join(","))
+      .order("created_at", { ascending: true });
+
+    if (error) throw error;
+    return (data ?? []) as unknown as Record<string, string>[];
+  }
+
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  const exportFileStem = () =>
+    `registrations-${new Date().toISOString().slice(0, 10)}`;
+
   /** Downloads every saved registration as a CSV file (opens fine in
       Excel/Numbers/Google Sheets). Read-only — does not touch the data. */
   async function exportRegistrationsCsv() {
@@ -1080,14 +1269,8 @@ export default function AdminSite() {
     setMessage("");
 
     try {
-      const { data, error } = await supabase
-        .from("registrations")
-        .select(REGISTRATION_COLUMNS.join(","))
-        .order("created_at", { ascending: true });
-
-      if (error) throw error;
-
-      const rows = (data ?? []) as unknown as Record<string, string>[];
+      const rows = await fetchRegistrationRows();
+      if (rows === null) return;
       if (!rows.length) {
         setMessage("No registrations to export yet.");
         return;
@@ -1106,17 +1289,96 @@ export default function AdminSite() {
         .join("\n");
       const csv = `${header}\n${body}`;
 
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `registrations-${new Date().toISOString().slice(0, 10)}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      downloadBlob(
+        new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+        `${exportFileStem()}.csv`,
+      );
 
-      setMessage(`Exported ${rows.length} registration${rows.length === 1 ? "" : "s"}.`);
+      setMessage(`Exported ${rows.length} registration${rows.length === 1 ? "" : "s"} (CSV).`);
+    } catch (error) {
+      setMessage(textFromError(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Downloads every saved registration as a real .xlsx workbook. */
+  async function exportRegistrationsXlsx() {
+    if (!supabase) return;
+    setBusy(true);
+    setMessage("");
+
+    try {
+      const rows = await fetchRegistrationRows();
+      if (rows === null) return;
+      if (!rows.length) {
+        setMessage("No registrations to export yet.");
+        return;
+      }
+
+      const XLSX = await import("xlsx");
+      const sheetRows = rows.map((row) =>
+        Object.fromEntries(
+          REGISTRATION_COLUMNS.map((col, i) => [REGISTRATION_HEADERS[i], row[col] ?? ""]),
+        ),
+      );
+      const worksheet = XLSX.utils.json_to_sheet(sheetRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
+      const arrayBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+
+      downloadBlob(
+        new Blob([arrayBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }),
+        `${exportFileStem()}.xlsx`,
+      );
+
+      setMessage(`Exported ${rows.length} registration${rows.length === 1 ? "" : "s"} (Excel).`);
+    } catch (error) {
+      setMessage(textFromError(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Downloads every saved registration as a PDF table. */
+  async function exportRegistrationsPdf() {
+    if (!supabase) return;
+    setBusy(true);
+    setMessage("");
+
+    try {
+      const rows = await fetchRegistrationRows();
+      if (rows === null) return;
+      if (!rows.length) {
+        setMessage("No registrations to export yet.");
+        return;
+      }
+
+      const [{ default: JsPDF }, autoTableModule] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+      ]);
+      const autoTable = autoTableModule.default;
+
+      const doc = new JsPDF({ orientation: "landscape" });
+      doc.setFontSize(14);
+      doc.text("JusMentor Academia — Course Registrations", 14, 16);
+      doc.setFontSize(9);
+      doc.text(`Exported ${new Date().toLocaleString()}`, 14, 22);
+
+      autoTable(doc, {
+        startY: 28,
+        head: [[...REGISTRATION_HEADERS]],
+        body: rows.map((row) => REGISTRATION_COLUMNS.map((col) => String(row[col] ?? ""))),
+        styles: { fontSize: 8, cellPadding: 3 },
+        headStyles: { fillColor: [15, 23, 42] },
+      });
+
+      doc.save(`${exportFileStem()}.pdf`);
+
+      setMessage(`Exported ${rows.length} registration${rows.length === 1 ? "" : "s"} (PDF).`);
     } catch (error) {
       setMessage(textFromError(error));
     } finally {
@@ -1469,6 +1731,133 @@ export default function AdminSite() {
               <div className="admin-message top-gap-sm">{message}</div>
             ) : null}
           </div>
+        ) : totpStage !== "verified" ? (
+          <div className="admin-standalone-card totp-card">
+            {totpStage === "checking" ? (
+              <>
+                <h1>Checking two-factor authentication…</h1>
+                <p>One moment.</p>
+              </>
+            ) : totpStage === "setup" ? (
+              <>
+                <h1>Set up two-factor authentication</h1>
+                <p>
+                  For extra security, admin logins now require an authenticator
+                  app. Scan this QR code with Google Authenticator, Microsoft
+                  Authenticator, or any other TOTP app, then enter the 6-digit
+                  code it shows you.
+                </p>
+
+                {qrDataUrl ? (
+                  <div className="totp-qr-wrap top-gap-sm">
+                    <img src={qrDataUrl} alt="Scan with your authenticator app" className="totp-qr" />
+                  </div>
+                ) : null}
+
+                {manualEntryKey ? (
+                  <p className="muted-note top-gap-xs">
+                    Can&apos;t scan it? Enter this key manually:{" "}
+                    <code>{manualEntryKey}</code>
+                  </p>
+                ) : null}
+
+                <label className="field top-gap-sm">
+                  <span className="field-label">6-digit code</span>
+                  <input
+                    className="field-input totp-code-input"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    value={totpCode}
+                    onChange={(e) =>
+                      setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    placeholder="000000"
+                  />
+                </label>
+
+                <div className="button-row top-gap-sm">
+                  <button
+                    type="button"
+                    className="gold-btn"
+                    disabled={totpBusy}
+                    onClick={verifyTwoFactorCode}
+                  >
+                    {totpBusy ? "Verifying..." : "Verify & enable"}
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost-btn"
+                    disabled={totpBusy}
+                    onClick={signOut}
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                {totpMessage ? (
+                  <div className="admin-message top-gap-sm">{totpMessage}</div>
+                ) : null}
+              </>
+            ) : totpStage === "verify" ? (
+              <>
+                <h1>Two-factor authentication</h1>
+                <p>Enter the 6-digit code from your authenticator app to continue.</p>
+
+                <label className="field top-gap-sm">
+                  <span className="field-label">6-digit code</span>
+                  <input
+                    className="field-input totp-code-input"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    value={totpCode}
+                    onChange={(e) =>
+                      setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    placeholder="000000"
+                    autoFocus
+                  />
+                </label>
+
+                <div className="button-row top-gap-sm">
+                  <button
+                    type="button"
+                    className="gold-btn"
+                    disabled={totpBusy}
+                    onClick={verifyTwoFactorCode}
+                  >
+                    {totpBusy ? "Verifying..." : "Verify"}
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost-btn"
+                    disabled={totpBusy}
+                    onClick={signOut}
+                  >
+                    Sign out
+                  </button>
+                </div>
+
+                {totpMessage ? (
+                  <div className="admin-message top-gap-sm">{totpMessage}</div>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <h1>Two-factor authentication unavailable</h1>
+                <p>
+                  {totpMessage ||
+                    "Something went wrong setting up two-factor authentication."}
+                </p>
+                <button type="button" className="ghost-btn top-gap-sm" onClick={signOut}>
+                  Sign out
+                </button>
+              </>
+            )}
+          </div>
         ) : (
           <div className="admin-app-grid">
             <aside className="admin-sidebar">
@@ -1705,15 +2094,53 @@ export default function AdminSite() {
                     >
                       {busy ? "Saving..." : "Save"}
                     </button>
-                    <button
-                      type="button"
-                      className="ghost-btn"
-                      disabled={busy}
-                      onClick={exportRegistrationsCsv}
-                      title="Download every saved registration as a CSV file (opens in Excel)"
-                    >
-                      Export to Excel (CSV)
-                    </button>
+                    <div className="export-menu-wrap" ref={exportMenuRef}>
+                      <button
+                        type="button"
+                        className="ghost-btn"
+                        disabled={busy}
+                        onClick={() => setExportMenuOpen((v) => !v)}
+                        title="Download every saved registration as PDF, CSV, or Excel"
+                        aria-expanded={exportMenuOpen}
+                      >
+                        <span aria-hidden="true">⭳</span> Export
+                      </button>
+
+                      {exportMenuOpen ? (
+                        <div className="export-menu">
+                          <button
+                            type="button"
+                            className="export-menu-item"
+                            onClick={() => {
+                              setExportMenuOpen(false);
+                              void exportRegistrationsPdf();
+                            }}
+                          >
+                            <span aria-hidden="true">📄</span> PDF
+                          </button>
+                          <button
+                            type="button"
+                            className="export-menu-item"
+                            onClick={() => {
+                              setExportMenuOpen(false);
+                              void exportRegistrationsCsv();
+                            }}
+                          >
+                            <span aria-hidden="true">📑</span> Excel (CSV)
+                          </button>
+                          <button
+                            type="button"
+                            className="export-menu-item"
+                            onClick={() => {
+                              setExportMenuOpen(false);
+                              void exportRegistrationsXlsx();
+                            }}
+                          >
+                            <span aria-hidden="true">📊</span> Excel (XLSX)
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
                     <button
                       type="button"
                       className="danger-btn"

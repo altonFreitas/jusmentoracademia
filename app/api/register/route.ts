@@ -64,17 +64,19 @@ export async function POST(request: Request) {
     );
   }
 
-  // Required transformation: every text field is lowercased before it's
-  // stored anywhere. Applied here (server-side) so it's authoritative
-  // regardless of what the client sent.
+  // Required transformation: every text field is uppercased before it's
+  // stored anywhere, except the email address — emails are case-sensitive
+  // in the local part and commonly contain a mix of upper/lowercase, so it
+  // is only trimmed and left exactly as the person typed it. Applied here
+  // (server-side) so it's authoritative regardless of what the client sent.
   const record = {
-    fullName: String(body.fullName).trim().toLowerCase(),
-    dateOfBirth: String(body.dateOfBirth).trim().toLowerCase(),
-    gender: String(body.gender).trim().toLowerCase(),
-    email: emailRaw.toLowerCase(),
-    phone: String(body.phone).trim().toLowerCase(),
-    address: String(body.address).trim().toLowerCase(),
-    occupation: String(body.occupation).trim().toLowerCase(),
+    fullName: String(body.fullName).trim().toUpperCase(),
+    dateOfBirth: String(body.dateOfBirth).trim().toUpperCase(),
+    gender: String(body.gender).trim().toUpperCase(),
+    email: emailRaw,
+    phone: String(body.phone).trim().toUpperCase(),
+    address: String(body.address).trim().toUpperCase(),
+    occupation: String(body.occupation).trim().toUpperCase(),
   };
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

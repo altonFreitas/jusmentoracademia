@@ -186,10 +186,6 @@ input[type="file"]:disabled {
   position: relative;
 }
 
-.about-section {
-  padding-top: clamp(40px, 6vw, 80px);
-}
-
 .services-section {
   padding-bottom: clamp(88px, 12vw, 168px);
 }
@@ -239,13 +235,6 @@ input[type="file"]:disabled {
 .center-text {
   text-align: center;
 }
-.left-title,
-.left-copy {
-  text-align: left;
-  margin-left: 0;
-  margin-right: 0;
-}
-
 /* --------------------------------------------------------------------------
    4. Reading progress + async loader
    -------------------------------------------------------------------------- */
@@ -423,18 +412,12 @@ input[type="file"]:disabled {
   transform-origin: 0 50%;
   transition: transform 0.35s var(--ease);
 }
-.nav-link:hover,
-.ghost-link:hover {
+.nav-link:hover {
   color: var(--gold-deep);
   background: rgba(193, 154, 46, 0.08);
 }
 .nav-link:hover::after {
   transform: scaleX(1);
-}
-.ghost-link {
-  font-size: 14px;
-  font-weight: 700;
-  color: #475569;
 }
 
 .header-controls {
@@ -609,13 +592,10 @@ input[type="file"]:disabled {
    -------------------------------------------------------------------------- */
 .wa-btn,
 .hero-btn,
-.contact-submit,
 .gold-btn,
 .ghost-btn,
 .danger-btn,
-.tab-btn,
-.quick-btn,
-.admin-fab {
+.quick-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -665,15 +645,11 @@ input[type="file"]:disabled {
 }
 
 .wa-btn,
-.contact-submit,
-.admin-fab,
 .ghost-btn {
   background: var(--navy);
   color: white;
 }
 .wa-btn:hover,
-.contact-submit:hover,
-.admin-fab:hover,
 .ghost-btn:hover {
   background: #1d2940;
 }
@@ -735,24 +711,6 @@ input[type="file"]:disabled {
 }
 .inline-btn {
   display: inline-flex;
-}
-
-.contact-submit:disabled {
-  opacity: 0.65;
-  cursor: default;
-  transform: none;
-}
-
-.setup-banner {
-  background: #fff7db;
-  border-bottom: 1px solid #ecd689;
-  color: #6e5710;
-  padding: 10px 0;
-  font-size: 14px;
-}
-.setup-banner code {
-  margin-left: 6px;
-  margin-right: 6px;
 }
 
 /* --------------------------------------------------------------------------
@@ -838,7 +796,6 @@ input[type="file"]:disabled {
 
 .hero-grid,
 .about-grid,
-.contact-grid,
 .admin-app-grid {
   position: relative;
   display: grid;
@@ -917,10 +874,6 @@ input[type="file"]:disabled {
   margin-top: clamp(36px, 5vw, 54px);
   align-items: start;
 }
-.contact-grid {
-  grid-template-columns: 0.95fr 1.05fr;
-}
-
 .section-title-wrap {
   max-width: 62ch;
 }
@@ -975,8 +928,7 @@ input[type="file"]:disabled {
 .story-text,
 .feature-text,
 .admin-standalone-card p,
-.admin-message,
-.sql-box {
+.admin-message {
   line-height: 1.8;
 }
 .section-description {
@@ -995,7 +947,6 @@ input[type="file"]:disabled {
 /* Display serif */
 .hero-title,
 .section-title,
-.profile-title,
 .feature-title,
 .quote-name,
 .footer-title {
@@ -1017,7 +968,6 @@ blockquote {
 .section-title,
 .feature-title,
 .quote-name,
-.profile-title,
 .admin-main h1,
 .admin-standalone-card h1 {
   text-wrap: balance;
@@ -1232,8 +1182,7 @@ blockquote {
   border-color: rgba(193, 154, 46, 0.28);
 }
 
-.feature-icon,
-.team-avatar {
+.feature-icon {
   width: 54px;
   height: 54px;
   display: grid;
@@ -1253,15 +1202,7 @@ blockquote {
 .center-icon {
   margin: 0 auto;
 }
-.team-avatar {
-  border-radius: 50%;
-  background: linear-gradient(140deg, #17233c, #0c1526);
-  color: #fff;
-  box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.6);
-}
 
-.team-head,
-.profile-top,
 .editor-card-top {
   display: flex;
   align-items: flex-start;
@@ -1278,19 +1219,8 @@ blockquote {
   text-transform: uppercase;
   letter-spacing: 0.16em;
 }
-.team-photo {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
-  background: #fff;
-  box-shadow: 0 8px 20px -10px rgba(15, 23, 42, 0.5);
-  flex: 0 0 auto;
-}
 
 .story-label,
-.profile-tag,
 .contact-k,
 .stat-label,
 .admin-small-label,
@@ -1302,7 +1232,6 @@ blockquote {
   letter-spacing: 0.22em;
 }
 .story-label,
-.profile-tag,
 .field-label,
 .admin-small-label {
   font-weight: 800;
@@ -1310,15 +1239,13 @@ blockquote {
 .story-label {
   color: var(--gold-deep);
 }
-.profile-tag,
 .gold-text {
   color: #f3df9a;
 }
 .stat-label,
 .quote-role,
 .feature-subtitle,
-.light-text,
-.profile-sub {
+.light-text {
   color: #cbd5e1;
 }
 
@@ -1384,7 +1311,6 @@ blockquote {
 }
 
 .stack-grid,
-.contact-list,
 .editor-stack,
 .button-stack {
   display: grid;
@@ -1399,64 +1325,27 @@ blockquote {
 }
 
 /* Pills / chips */
-.pill,
-.social-chip,
-.tab-btn {
+.pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  padding: 10px 16px;
+  padding: 10px 18px;
+  min-height: 40px;
   font-size: 12px;
   font-weight: 800;
   line-height: 1;
-}
-.pill {
-  min-height: 40px;
-  padding: 10px 18px;
   background: rgba(230, 199, 102, 0.12);
   border: 1px solid rgba(230, 199, 102, 0.3);
   color: #f3df9a;
   text-transform: uppercase;
   letter-spacing: 0.24em;
 }
-.social-chip {
-  min-height: 40px;
-  padding: 10px 18px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.program-reg-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #9aa5b5;
-}
-.program-reg-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #6b7280;
-  flex: 0 0 auto;
-}
-.program-reg-status.is-open {
-  color: var(--gold-2);
-}
-.program-reg-status.is-open .program-reg-dot {
-  background: var(--gold-2);
-  box-shadow: 0 0 8px rgba(230, 199, 102, 0.7);
-}
 
 /* --------------------------------------------------------------------------
    10. Bands
    -------------------------------------------------------------------------- */
-.white-band,
-.contact-dark {
+.white-band {
   background: #fffdfa;
 }
 .band-dark {
@@ -1651,12 +1540,7 @@ blockquote {
 /* --------------------------------------------------------------------------
    13. Forms (admin / shared)
    -------------------------------------------------------------------------- */
-.form-grid {
-  display: grid;
-  gap: 14px;
-}
 .form-input,
-.form-textarea,
 .field-input {
   width: 100%;
   border-radius: var(--r-md);
@@ -1671,7 +1555,6 @@ blockquote {
     background 0.25s var(--ease);
 }
 .form-input::placeholder,
-.form-textarea::placeholder,
 .field-input::placeholder {
   color: #94a3b8;
 }
@@ -1679,49 +1562,17 @@ blockquote {
   background: #fff;
 }
 .field-input:focus,
-.form-input:focus,
-.form-textarea:focus {
+.form-input:focus {
   border-color: var(--gold);
   box-shadow: 0 0 0 4px rgba(193, 154, 46, 0.16);
   background: #fff;
 }
-.form-textarea,
 .field-textarea {
   min-height: 150px;
   resize: vertical;
 }
-.form-status {
-  margin: 4px 0 0;
-  border-radius: 14px;
-  padding: 12px 14px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-.form-status.success {
-  background: #eaf7ee;
-  color: #1c6b39;
-  border: 1px solid #bfe6cd;
-}
-.form-status.error {
-  background: #fdecec;
-  color: #a12626;
-  border: 1px solid #f3c9c9;
-}
 .field-row {
   display: block;
-}
-.text-link {
-  color: var(--gold-deep);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.text-link:hover {
-  color: #7a5f0e;
-}
-.muted-note {
-  color: #94a3b8;
-  font-size: 14px;
 }
 
 /* --------------------------------------------------------------------------
@@ -1818,12 +1669,6 @@ blockquote {
   transform: translateY(-4px) scale(1.06);
   box-shadow: var(--shadow-gold);
 }
-.social-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
-}
 
 /* --------------------------------------------------------------------------
    15. Footer
@@ -1861,19 +1706,6 @@ blockquote {
   line-height: 1.6;
   color: #64748b;
   text-align: center;
-}
-.footer-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-}
-.footer-nav a {
-  font-size: 14px;
-  font-weight: 700;
-  color: #475569;
-}
-.footer-nav a:hover {
-  color: var(--gold-deep);
 }
 
 /* --------------------------------------------------------------------------
@@ -2013,7 +1845,6 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
-.social-chip:focus-visible,
 .faq-btn:focus-visible,
 .social-icon:focus-visible {
   outline: 3px solid var(--gold-2);
@@ -2027,7 +1858,6 @@ textarea:focus-visible,
 @media (max-width: 1080px) {
   .hero-grid,
   .about-grid,
-  .contact-grid,
   .admin-app-grid,
   .four-grid,
   .settings-grid,
@@ -2036,7 +1866,6 @@ textarea:focus-visible,
   }
   .hero-grid,
   .about-grid,
-  .contact-grid,
   .admin-app-grid {
     align-items: start;
   }
@@ -2087,7 +1916,6 @@ textarea:focus-visible,
   }
   .hero-grid,
   .about-grid,
-  .contact-grid,
   .admin-app-grid,
   .three-grid,
   .four-grid,
@@ -2096,8 +1924,6 @@ textarea:focus-visible,
   .hero-stats {
     grid-template-columns: 1fr;
   }
-  .profile-top,
-  .team-head,
   .editor-card-top,
   .admin-toolbar,
   .admin-header-row {
@@ -2309,15 +2135,13 @@ textarea:focus-visible,
 }
 
 /* Forms */
-[data-theme="dark"] .page-shell .form-input,
-[data-theme="dark"] .page-shell .form-textarea {
+[data-theme="dark"] .page-shell .form-input {
   background: #0e1626;
   border-color: rgba(255, 255, 255, 0.12);
   color: var(--text);
   color-scheme: dark;
 }
-[data-theme="dark"] .page-shell .form-input::placeholder,
-[data-theme="dark"] .page-shell .form-textarea::placeholder {
+[data-theme="dark"] .page-shell .form-input::placeholder {
   color: #7c8ba0;
 }
 
@@ -2338,7 +2162,6 @@ textarea:focus-visible,
 [data-theme="dark"] .page-shell .event-image {
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
-[data-theme="dark"] .page-shell .team-photo,
 [data-theme="dark"] .page-shell .partner-logo {
   border-color: rgba(255, 255, 255, 0.14);
 }
@@ -2445,31 +2268,12 @@ textarea:focus-visible,
 .nav-btn.active:hover {
   padding-left: 14px;
 }
-.tab-btn {
-  min-height: 40px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #0f172a;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-}
-.tab-btn:hover {
-  background: #fff;
-}
-.tab-btn.active {
-  background: var(--gold);
-  color: #111827;
-  box-shadow: 0 8px 18px rgba(201, 162, 39, 0.28);
-}
-.admin-message,
-.sql-box {
+.admin-message {
   border-radius: var(--r-md);
   padding: 10px 14px;
   background: #fff8dc;
   border: 1px solid #ead47a;
   color: #6e5710;
-}
-.sql-box {
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 .admin-hint {
   margin: 8px 0 0;
@@ -2493,33 +2297,6 @@ textarea:focus-visible,
   cursor: pointer;
 }
 
-/* Per-program registration scheduling (admin) */
-.reg-schedule {
-  padding-top: 6px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
-  margin-top: 4px;
-}
-.reg-schedule-status {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-}
-.reg-schedule-clear {
-  border: none;
-  background: none;
-  padding: 0;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--gold-2);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.reg-schedule-clear:hover {
-  color: #fff;
-}
 .image-field {
   display: block;
 }
@@ -2590,46 +2367,43 @@ textarea:focus-visible,
   background: rgba(193, 154, 46, 0.12);
 }
 
-/* Admin login profile card */
-.profile-card {
-  border-radius: var(--r-xl);
-  padding: 26px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+/* Export dropdown (Settings → Course Registration) */
+.export-menu-wrap {
+  position: relative;
+  display: inline-flex;
 }
-.profile-inner {
-  border-radius: var(--r-lg);
-  padding: 30px;
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-.profile-top {
-  margin-bottom: 18px;
-}
-.profile-title {
-  margin-top: 12px;
-  max-width: 320px;
-  font-size: 32px;
-  line-height: 1.05;
-  color: #fff;
-}
-.profile-sub {
-  margin-top: 10px;
-  max-width: 340px;
-  font-size: 14px;
-  line-height: 1.35;
-}
-.profile-logo {
-  width: 74px;
-  height: 74px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: #fff;
+.export-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  min-width: 180px;
+  display: grid;
+  gap: 2px;
   padding: 6px;
+  border-radius: var(--r-md);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  object-fit: contain;
+  background: #141d2e;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+.export-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  color: #e5e7eb;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+.export-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* Password field toggle */
@@ -2661,6 +2435,30 @@ textarea:focus-visible,
   background: #f1f5f9;
   color: var(--gold-deep);
   border-color: rgba(193, 154, 46, 0.45);
+}
+
+/* Two-factor authentication (TOTP) */
+.totp-card {
+  max-width: 460px;
+}
+.totp-qr-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+}
+.totp-qr {
+  width: 200px;
+  height: 200px;
+  display: block;
+}
+.totp-code-input {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5em;
 }
 
 /* ==========================================================================
@@ -3055,13 +2853,6 @@ textarea:focus-visible,
 .reg-article {
   max-width: 700px;
 }
-.reg-program-name {
-  margin: 10px 0 0;
-  font-family: var(--font-serif);
-  font-size: clamp(20px, 2.4vw, 26px);
-  font-weight: 600;
-  color: #0f172a;
-}
 .reg-form {
   display: block;
 }
@@ -3072,6 +2863,12 @@ textarea:focus-visible,
 }
 .reg-grid select.form-input {
   cursor: pointer;
+}
+.reg-grid .form-input:not([type="email"]) {
+  text-transform: uppercase;
+}
+.reg-grid .form-input[type="email"] {
+  text-transform: none;
 }
 .reg-field-error {
   margin: 6px 0 0;
@@ -3109,7 +2906,10 @@ textarea:focus-visible,
   font-weight: 600;
   color: #1e2532;
   word-break: break-word;
-  text-transform: lowercase;
+  text-transform: uppercase;
+}
+.reg-review-row dd.reg-review-value-natural {
+  text-transform: none;
 }
 .reg-review-actions {
   display: flex;
@@ -3169,8 +2969,5 @@ textarea:focus-visible,
   color: #eef2f8;
 }
 [data-theme="dark"] .reg-result-title {
-  color: #eef2f8;
-}
-[data-theme="dark"] .reg-program-name {
   color: #eef2f8;
 }

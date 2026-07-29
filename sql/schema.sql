@@ -492,3 +492,30 @@ create policy "admins delete registrations"
 on public.registrations
 for delete
 using (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- Two-factor authentication (TOTP) for admin logins.
+--
+-- Compatible with any standard authenticator app — Google Authenticator,
+-- Microsoft Authenticator, Authy, 1Password, etc. — since it's just the
+-- standard RFC 6238 TOTP algorithm behind an otpauth:// QR code.
+--
+-- The `secret` column is intentionally NOT exposed to anon/authenticated
+-- roles via RLS. It is only ever read or written by server-side API routes
+-- using the Supabase service role key, so the shared secret never reaches
+-- the browser after the initial enrollment QR code is scanned.
+-- ---------------------------------------------------------------------------
+create table if not exists public.admin_totp (
+  id uuid primary key references auth.users (id) on delete cascade,
+  secret text not null,
+  enabled boolean not null default false,
+  created_at timestamptz not null default now(),
+  confirmed_at timestamptz
+);
+
+alter table public.admin_totp enable row level security;
+
+-- No select/insert/update/delete policies are defined for anon or
+-- authenticated roles on purpose — this table is only ever touched through
+-- server-side API routes using the service role key, which bypasses RLS.
+
