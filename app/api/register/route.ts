@@ -78,6 +78,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    return NextResponse.json(
+      { error: "Registration is not available right now. Please try again later." },
+      { status: 503 },
+    );
+  }
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // Authoritative, server-side gate — this is the check that actually
+  // matters. The admin panel's toggle only controls whether the button is
+  // *shown* on the public site; without this check here, anyone who knew
+  // or guessed the /register URL could still submit directly regardless of
+  // the toggle. This runs before honeypot/field checks so a disabled form
+  // fails fast without doing unnecessary work.
+  const { data: gateRow, error: gateError } = await supabase
+    .from("site_settings")
+    .select("registration_enabled, email, registration_email_subject")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (gateError) {
+    console.error("Could not check registration_enabled:", gateError);
+    return NextResponse.json(
+      { error: "Registration is not available right now. Please try again later." },
+      { status: 503 },
+    );
+  }
+
+  if (gateRow?.registration_enabled !== "true") {
+    return NextResponse.json(
+      { error: "Registration is currently closed." },
+      { status: 403 },
+    );
+  }
+
   // Honeypot tripped — reply as if it succeeded so the bot doesn't learn
   // anything, but don't actually process or store the submission.
   if (body.website && body.website.trim()) {
@@ -116,16 +153,6 @@ export async function POST(request: Request) {
     occupation: String(body.occupation).trim().toUpperCase(),
   };
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.json(
-      { error: "Registration is not available right now. Please try again later." },
-      { status: 503 },
-    );
-  }
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
   // 1) Primary storage: save the registration in Supabase.
   const { error: insertError } = await supabase.from("registrations").insert({
     full_name: record.fullName,
@@ -152,15 +179,9 @@ export async function POST(request: Request) {
   //    submission. A failure here is logged but never fails the request,
   //    since the registration is already safely saved in Supabase.
   try {
-    const { data: settingsRow } = await supabase
-      .from("site_settings")
-      .select("email, registration_email_subject")
-      .eq("id", 1)
-      .maybeSingle();
-
-    const institutionEmail = settingsRow?.email as string | undefined;
+    const institutionEmail = gateRow?.email as string | undefined;
     const subject =
-      (settingsRow?.registration_email_subject as string | undefined)?.trim() ||
+      (gateRow?.registration_email_subject as string | undefined)?.trim() ||
       "New Course Registration";
 
     const gmailUser = process.env.GMAIL_USER;

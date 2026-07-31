@@ -289,6 +289,42 @@ function RefreshIcon() {
   );
 }
 
+/** Small chevron button used to expand/collapse an editor card. Kept as its
+    own button — rather than making the whole header clickable — so it never
+    interferes with the Save/Delete buttons that usually sit next to it. */
+function CardToggle({
+  open,
+  onToggle,
+}: {
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="card-toggle-btn"
+      onClick={onToggle}
+      aria-expanded={open}
+      aria-label={open ? "Collapse this section" : "Expand this section"}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        className={open ? "card-toggle-chevron is-open" : "card-toggle-chevron"}
+      >
+        <path d="m9 6 6 6-6 6" />
+      </svg>
+    </button>
+  );
+}
+
 function Field({
   label,
   value,
@@ -538,6 +574,7 @@ export default function AdminSite() {
   const [authLoading, setAuthLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [roleChecked, setRoleChecked] = useState(false);
   const [message, setMessage] = useState<string>("");
   const [content, setContent] = useState<SiteContent>(defaultContent);
   const [activeTab, setActiveTab] = useState<"settings" | AdminCollectionKey>(
@@ -548,6 +585,20 @@ export default function AdminSite() {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [openCards, setOpenCards] = useState<Record<string, boolean>>({});
+
+  /** Whether a given collapsible editor card is currently open. Cards start
+      at `defaultOpen` until the person toggles them, at which point their
+      explicit choice is remembered (per card key) for the rest of the
+      session. */
+  function isCardOpen(key: string, defaultOpen: boolean) {
+    return openCards[key] ?? defaultOpen;
+  }
+
+  function toggleCard(key: string, defaultOpen: boolean) {
+    setOpenCards((prev) => ({ ...prev, [key]: !(prev[key] ?? defaultOpen) }));
+  }
 
   // Two-factor authentication (TOTP) — Google Authenticator, Microsoft
   // Authenticator, or any other standard authenticator app.
@@ -600,6 +651,7 @@ export default function AdminSite() {
     localStorage.removeItem(ADMIN_EXPIRY_KEY);
     setLoggedIn(false);
     setIsAdmin(false);
+    setRoleChecked(false);
     setSessionEmail("");
     resetTwoFactorState();
     setMessage("Session expired. Please sign in again.");
@@ -807,6 +859,7 @@ export default function AdminSite() {
         clearLogoutTimer();
         localStorage.removeItem(ADMIN_EXPIRY_KEY);
         setIsAdmin(false);
+        setRoleChecked(false);
         setAuthLoading(false);
       }
     });
@@ -943,12 +996,14 @@ export default function AdminSite() {
 
     if (profileRes.error) {
       setIsAdmin(false);
+      setRoleChecked(true);
       setMessage(profileRes.error.message);
       return;
     }
 
     const role = profileRes.data?.role === "admin";
     setIsAdmin(role);
+    setRoleChecked(true);
 
     if (role) {
       await checkTwoFactor(profileRes.data?.email || sessionEmail);
@@ -1074,6 +1129,7 @@ export default function AdminSite() {
     await supabase.auth.signOut();
     setLoggedIn(false);
     setIsAdmin(false);
+    setRoleChecked(false);
     setSessionEmail("");
     resetTwoFactorState();
     setMessage("Signed out.");
@@ -1654,7 +1710,7 @@ export default function AdminSite() {
             </div>
           </a>
 
-          {loggedIn ? (
+          {loggedIn && roleChecked && !(isAdmin && totpStage !== "verified") ? (
             <button type="button" className="ghost-btn" onClick={signOut}>
               Sign out
             </button>
@@ -1725,8 +1781,17 @@ export default function AdminSite() {
           </div>
         ) : !isAdmin ? (
           <div className="admin-standalone-card">
-            <h1>Checking access...</h1>
-            <p>Please refresh the page or sign in again.</p>
+            {roleChecked ? (
+              <>
+                <h1>No admin access</h1>
+                <p>Please refresh the page or sign in again.</p>
+              </>
+            ) : (
+              <>
+                <h1>Checking access...</h1>
+                <p>One moment.</p>
+              </>
+            )}
             {message ? (
               <div className="admin-message top-gap-sm">{message}</div>
             ) : null}
@@ -1792,7 +1857,7 @@ export default function AdminSite() {
                     disabled={totpBusy}
                     onClick={signOut}
                   >
-                    Cancel
+                    Sign out
                   </button>
                 </div>
 
@@ -1852,15 +1917,58 @@ export default function AdminSite() {
                   {totpMessage ||
                     "Something went wrong setting up two-factor authentication."}
                 </p>
-                <button type="button" className="ghost-btn top-gap-sm" onClick={signOut}>
-                  Sign out
-                </button>
+                <div className="button-row top-gap-sm">
+                  <button type="button" className="ghost-btn" onClick={signOut}>
+                    Sign out
+                  </button>
+                </div>
               </>
             )}
           </div>
         ) : (
           <div className="admin-app-grid">
-            <aside className="admin-sidebar">
+            {!sidebarOpen ? (
+              <div className="admin-mobile-bar">
+                <button
+                  type="button"
+                  className="admin-sidebar-toggle"
+                  onClick={() => setSidebarOpen(true)}
+                  aria-expanded={sidebarOpen}
+                  aria-controls="admin-sidebar"
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                    strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                  Menu
+                </button>
+              </div>
+            ) : null}
+
+            <div
+              className={
+                sidebarOpen ? "admin-sidebar-backdrop is-open" : "admin-sidebar-backdrop"
+              }
+              onClick={() => setSidebarOpen(false)}
+              aria-hidden="true"
+            />
+
+            <aside
+              id="admin-sidebar"
+              className={sidebarOpen ? "admin-sidebar is-open" : "admin-sidebar"}
+            >
+              <button
+                type="button"
+                className="admin-sidebar-close"
+                onClick={() => setSidebarOpen(false)}
+                aria-label="Close menu"
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                  strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="m6 6 12 12M18 6 6 18" />
+                </svg>
+              </button>
+
               <div className="admin-sidebar-block">
                 <div className="admin-small-label">Logged in as</div>
                 <div className="admin-user">{sessionEmail || "—"}</div>
@@ -1874,7 +1982,10 @@ export default function AdminSite() {
                     className={
                       activeTab === item.key ? "nav-btn active" : "nav-btn"
                     }
-                    onClick={() => setActiveTab(item.key)}
+                    onClick={() => {
+                      setActiveTab(item.key);
+                      setSidebarOpen(false);
+                    }}
                   >
                     {item.label}
                   </button>
@@ -1974,7 +2085,13 @@ export default function AdminSite() {
               {activeTab === "settings" ? (
                 <div className="editor-card top-gap-sm">
                   <div className="editor-card-top">
-                    <strong>Section heading — &quot;About&quot;</strong>
+                    <div className="editor-card-title-row">
+                      <CardToggle
+                        open={isCardOpen("settings-about-heading", true)}
+                        onToggle={() => toggleCard("settings-about-heading", true)}
+                      />
+                      <strong>Section heading — &quot;About&quot;</strong>
+                    </div>
                     <button
                       type="button"
                       className="gold-btn"
@@ -1984,179 +2101,211 @@ export default function AdminSite() {
                       {busy ? "Saving..." : "Save heading"}
                     </button>
                   </div>
-                  <p className="admin-hint">
-                    The heading shown above the About section on the site.
-                    Portuguese fields are optional.
-                  </p>
-                  <div className="settings-grid top-gap-sm">
-                    <Field
-                      label="Eyebrow"
-                      value={content.settings.aboutEyebrow}
-                      onChange={(v) => updateSetting("aboutEyebrow", v)}
-                    />
-                    <Field
-                      label="Eyebrow (Português)"
-                      value={content.settings.aboutEyebrowPt}
-                      onChange={(v) => updateSetting("aboutEyebrowPt", v)}
-                    />
-                    <div className="span-2">
-                      <Field
-                        label="Title"
-                        value={content.settings.aboutTitle}
-                        onChange={(v) => updateSetting("aboutTitle", v)}
-                      />
-                    </div>
-                    <div className="span-2">
-                      <Field
-                        label="Title (Português)"
-                        value={content.settings.aboutTitlePt}
-                        onChange={(v) => updateSetting("aboutTitlePt", v)}
-                      />
-                    </div>
-                    <div className="span-2">
-                      <Field
-                        label="Description"
-                        value={content.settings.aboutDescription}
-                        onChange={(v) => updateSetting("aboutDescription", v)}
-                        textarea
-                      />
-                    </div>
-                    <div className="span-2">
-                      <Field
-                        label="Description (Português)"
-                        value={content.settings.aboutDescriptionPt}
-                        onChange={(v) =>
-                          updateSetting("aboutDescriptionPt", v)
-                        }
-                        textarea
-                      />
-                    </div>
-                  </div>
+                  {isCardOpen("settings-about-heading", true) ? (
+                    <>
+                      <p className="admin-hint">
+                        The heading shown above the About section on the site.
+                        Portuguese fields are optional.
+                      </p>
+                      <div className="settings-grid top-gap-sm">
+                        <Field
+                          label="Eyebrow"
+                          value={content.settings.aboutEyebrow}
+                          onChange={(v) => updateSetting("aboutEyebrow", v)}
+                        />
+                        <Field
+                          label="Eyebrow (Português)"
+                          value={content.settings.aboutEyebrowPt}
+                          onChange={(v) => updateSetting("aboutEyebrowPt", v)}
+                        />
+                        <div className="span-2">
+                          <Field
+                            label="Title"
+                            value={content.settings.aboutTitle}
+                            onChange={(v) => updateSetting("aboutTitle", v)}
+                          />
+                        </div>
+                        <div className="span-2">
+                          <Field
+                            label="Title (Português)"
+                            value={content.settings.aboutTitlePt}
+                            onChange={(v) => updateSetting("aboutTitlePt", v)}
+                          />
+                        </div>
+                        <div className="span-2">
+                          <Field
+                            label="Description"
+                            value={content.settings.aboutDescription}
+                            onChange={(v) => updateSetting("aboutDescription", v)}
+                            textarea
+                          />
+                        </div>
+                        <div className="span-2">
+                          <Field
+                            label="Description (Português)"
+                            value={content.settings.aboutDescriptionPt}
+                            onChange={(v) =>
+                              updateSetting("aboutDescriptionPt", v)
+                            }
+                            textarea
+                          />
+                        </div>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               ) : null}
 
               {activeTab === "settings" ? (
                 <div className="editor-card top-gap-sm">
                   <div className="editor-card-top">
-                    <strong>Course Registration</strong>
+                    <div className="editor-card-title-row">
+                      <CardToggle
+                        open={isCardOpen("settings-registration", true)}
+                        onToggle={() => toggleCard("settings-registration", true)}
+                      />
+                      <strong>Course Registration</strong>
+                    </div>
                   </div>
-                  <p className="admin-hint">
-                    When enabled, a &quot;Course Registration&quot; button
-                    appears in the site header (after the language switch).
-                    Submissions are saved below and a notification email is
-                    sent to your institute email for every registration —
-                    replying to that email goes straight to the registrant.
-                  </p>
+                  {isCardOpen("settings-registration", true) ? (
+                    <>
+                      <p className="admin-hint">
+                        When enabled, a &quot;Course Registration&quot; button
+                        appears in the site header (after the language switch).
+                        Submissions are saved below and a notification email is
+                        sent to your institute email for every registration —
+                        replying to that email goes straight to the registrant.
+                      </p>
 
-                  <div className="top-gap-sm">
-                    <Field
-                      label="Notification email subject"
-                      value={content.settings.registrationEmailSubject}
-                      onChange={(v) =>
-                        updateSetting("registrationEmailSubject", v)
-                      }
-                    />
-                    <p className="admin-hint">
-                      Required before the button can be enabled — used as the
-                      subject line of every registration notification email.
-                    </p>
-                  </div>
+                      <div className="top-gap-sm">
+                        <Field
+                          label="Notification email subject"
+                          value={content.settings.registrationEmailSubject}
+                          onChange={(v) =>
+                            updateSetting("registrationEmailSubject", v)
+                          }
+                        />
+                        <p className="admin-hint">
+                          Required before the button can be enabled — used as the
+                          subject line of every registration notification email.
+                        </p>
+                      </div>
 
-                  <label className="registration-toggle top-gap-sm">
-                    <input
-                      type="checkbox"
-                      checked={content.settings.registrationEnabled === "true"}
-                      onChange={(e) => {
-                        if (
-                          e.target.checked &&
-                          !content.settings.registrationEmailSubject.trim()
-                        ) {
-                          setMessage("Define the subject for Email");
-                          return;
-                        }
-                        updateSetting(
-                          "registrationEnabled",
-                          e.target.checked ? "true" : "false",
-                        );
-                      }}
-                    />
-                    <span>
-                      Show the Course Registration button on the public site
-                    </span>
-                  </label>
+                      <label className="registration-toggle top-gap-sm">
+                        <input
+                          type="checkbox"
+                          checked={content.settings.registrationEnabled === "true"}
+                          onChange={(e) => {
+                            if (
+                              e.target.checked &&
+                              !content.settings.registrationEmailSubject.trim()
+                            ) {
+                              setMessage("Define the subject for Email");
+                              return;
+                            }
+                            updateSetting(
+                              "registrationEnabled",
+                              e.target.checked ? "true" : "false",
+                            );
+                          }}
+                        />
+                        <span>
+                          Show the Course Registration button on the public site
+                        </span>
+                      </label>
 
-                  <div className="button-row top-gap-sm">
+                      <div className="button-row top-gap-sm">
+                        <button
+                          type="button"
+                          className="gold-btn"
+                          disabled={busy}
+                          onClick={saveSettings}
+                        >
+                          {busy ? "Saving..." : "Save"}
+                        </button>
+                        <div className="export-menu-wrap" ref={exportMenuRef}>
+                          <button
+                            type="button"
+                            className="ghost-btn"
+                            disabled={busy}
+                            onClick={() => setExportMenuOpen((v) => !v)}
+                            title="Download every saved registration as PDF, CSV, or Excel"
+                            aria-expanded={exportMenuOpen}
+                          >
+                            <span aria-hidden="true">⭳</span> Export
+                          </button>
+
+                          {exportMenuOpen ? (
+                            <div className="export-menu">
+                              <button
+                                type="button"
+                                className="export-menu-item"
+                                onClick={() => {
+                                  setExportMenuOpen(false);
+                                  void exportRegistrationsPdf();
+                                }}
+                              >
+                                <span aria-hidden="true">📄</span> PDF
+                              </button>
+                              <button
+                                type="button"
+                                className="export-menu-item"
+                                onClick={() => {
+                                  setExportMenuOpen(false);
+                                  void exportRegistrationsCsv();
+                                }}
+                              >
+                                <span aria-hidden="true">📑</span> Excel (CSV)
+                              </button>
+                              <button
+                                type="button"
+                                className="export-menu-item"
+                                onClick={() => {
+                                  setExportMenuOpen(false);
+                                  void exportRegistrationsXlsx();
+                                }}
+                              >
+                                <span aria-hidden="true">📊</span> Excel (XLSX)
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
+                        <button
+                          type="button"
+                          className="danger-btn"
+                          disabled={busy}
+                          onClick={deleteAllRegistrations}
+                          title="Permanently delete every saved registration — export first if you need a copy"
+                        >
+                          Delete all registrations
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {activeTab === "settings" ? (
+                <div className="editor-card top-gap-sm">
+                  <div className="editor-card-top">
+                    <div className="editor-card-title-row">
+                      <CardToggle
+                        open={isCardOpen("settings-general", true)}
+                        onToggle={() => toggleCard("settings-general", true)}
+                      />
+                      <strong>General settings</strong>
+                    </div>
                     <button
                       type="button"
                       className="gold-btn"
                       disabled={busy}
                       onClick={saveSettings}
                     >
-                      {busy ? "Saving..." : "Save"}
-                    </button>
-                    <div className="export-menu-wrap" ref={exportMenuRef}>
-                      <button
-                        type="button"
-                        className="ghost-btn"
-                        disabled={busy}
-                        onClick={() => setExportMenuOpen((v) => !v)}
-                        title="Download every saved registration as PDF, CSV, or Excel"
-                        aria-expanded={exportMenuOpen}
-                      >
-                        <span aria-hidden="true">⭳</span> Export
-                      </button>
-
-                      {exportMenuOpen ? (
-                        <div className="export-menu">
-                          <button
-                            type="button"
-                            className="export-menu-item"
-                            onClick={() => {
-                              setExportMenuOpen(false);
-                              void exportRegistrationsPdf();
-                            }}
-                          >
-                            <span aria-hidden="true">📄</span> PDF
-                          </button>
-                          <button
-                            type="button"
-                            className="export-menu-item"
-                            onClick={() => {
-                              setExportMenuOpen(false);
-                              void exportRegistrationsCsv();
-                            }}
-                          >
-                            <span aria-hidden="true">📑</span> Excel (CSV)
-                          </button>
-                          <button
-                            type="button"
-                            className="export-menu-item"
-                            onClick={() => {
-                              setExportMenuOpen(false);
-                              void exportRegistrationsXlsx();
-                            }}
-                          >
-                            <span aria-hidden="true">📊</span> Excel (XLSX)
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
-                    <button
-                      type="button"
-                      className="danger-btn"
-                      disabled={busy}
-                      onClick={deleteAllRegistrations}
-                      title="Permanently delete every saved registration — export first if you need a copy"
-                    >
-                      Delete all registrations
+                      {busy ? "Saving..." : "Save settings"}
                     </button>
                   </div>
-                </div>
-              ) : null}
-
-              {activeTab === "settings" ? (
-                <div className="settings-card top-gap-sm">
-                  <div className="settings-grid">
+                  {isCardOpen("settings-general", true) ? (
+                  <div className="settings-grid top-gap-sm">
                     <Field
                       label="Institute name"
                       value={content.settings.name}
@@ -2362,10 +2511,20 @@ export default function AdminSite() {
                       </p>
                     </div>
                   </div>
+                  ) : null}
+                </div>
+              ) : null}
 
+              {activeTab === "settings" ? (
                   <div className="editor-card top-gap-sm">
                     <div className="editor-card-top">
-                      <strong>Section heading — &quot;Contact&quot;</strong>
+                      <div className="editor-card-title-row">
+                        <CardToggle
+                          open={isCardOpen("settings-contact-heading", true)}
+                          onToggle={() => toggleCard("settings-contact-heading", true)}
+                        />
+                        <strong>Section heading — &quot;Contact&quot;</strong>
+                      </div>
                       <button
                         type="button"
                         className="gold-btn"
@@ -2375,6 +2534,8 @@ export default function AdminSite() {
                         {busy ? "Saving..." : "Save heading"}
                       </button>
                     </div>
+                    {isCardOpen("settings-contact-heading", true) ? (
+                    <>
                     <p className="admin-hint">
                       The heading shown above the contact card at the bottom of
                       the site. Portuguese fields are optional.
@@ -2425,17 +2586,28 @@ export default function AdminSite() {
                         />
                       </div>
                     </div>
+                    </>
+                    ) : null}
                   </div>
-                </div>
-              ) : (
+              ) : null}
+
+              {activeTab !== "settings" ? (
                 <>
                   {sectionHeadingConfig[activeTab] ? (
                     (() => {
                       const cfg = sectionHeadingConfig[activeTab]!;
+                      const headingKey = `${activeTab}-section-heading`;
+                      const headingOpen = isCardOpen(headingKey, true);
                       return (
                         <div className="editor-card top-gap-sm">
                           <div className="editor-card-top">
-                            <strong>{cfg.title}</strong>
+                            <div className="editor-card-title-row">
+                              <CardToggle
+                                open={headingOpen}
+                                onToggle={() => toggleCard(headingKey, true)}
+                              />
+                              <strong>{cfg.title}</strong>
+                            </div>
                             <button
                               type="button"
                               className="gold-btn"
@@ -2445,6 +2617,8 @@ export default function AdminSite() {
                               {busy ? "Saving..." : "Save heading"}
                             </button>
                           </div>
+                          {headingOpen ? (
+                          <>
                           <p className="admin-hint">
                             The heading shown above this section on the site.
                             Portuguese fields are optional.
@@ -2495,6 +2669,8 @@ export default function AdminSite() {
                               />
                             </div>
                           </div>
+                          </>
+                          ) : null}
                         </div>
                       );
                     })()
@@ -2503,15 +2679,23 @@ export default function AdminSite() {
                   <div className="editor-stack top-gap-sm">
                     {content[activeTab].map((item, index) => {
                       const record = item as Record<string, unknown>;
+                      const itemKey = `${activeTab}-item-${index}`;
+                      const itemOpen = isCardOpen(itemKey, false);
                       return (
                         <div
                           key={(item.id || "new") + index}
                           className="editor-card"
                         >
                           <div className="editor-card-top">
-                            <strong>
-                              {collectionLabels[activeTab]} #{index + 1}
-                            </strong>
+                            <div className="editor-card-title-row">
+                              <CardToggle
+                                open={itemOpen}
+                                onToggle={() => toggleCard(itemKey, false)}
+                              />
+                              <strong>
+                                {collectionLabels[activeTab]} #{index + 1}
+                              </strong>
+                            </div>
 
                             <button
                               type="button"
@@ -2524,6 +2708,7 @@ export default function AdminSite() {
                             </button>
                           </div>
 
+                          {itemOpen ? (
                           <div className="settings-grid">
                             {collectionFields[activeTab].flatMap((field) => {
                               const value = String(record[field.key] ?? "");
@@ -2627,12 +2812,13 @@ export default function AdminSite() {
                               return cells;
                             })}
                           </div>
+                          ) : null}
                         </div>
                       );
                     })}
                   </div>
                 </>
-              )}
+              ) : null}
             </main>
           </div>
         )}

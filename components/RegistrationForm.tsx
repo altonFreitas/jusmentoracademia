@@ -5,6 +5,7 @@ import Link from "next/link";
 import { logoSrc, defaultSettings } from "@/lib/defaults";
 import { tr, type UiKey } from "@/lib/i18n";
 import type { Lang } from "@/lib/types";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
 
 const LANG_KEY = "jma-lang";
 
@@ -44,6 +45,41 @@ export default function RegistrationForm() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  /** null = still checking; true/false once we know. Starts optimistic
+      (assume open) so the form isn't hidden behind a loading flicker for
+      the common case — if it turns out to be closed, the form is swapped
+      out below. The server enforces this authoritatively regardless of
+      what this check finds, so a stale/failed check here is only ever a
+      UX nicety, never a security gap. */
+  const [registrationOpen, setRegistrationOpen] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase) {
+        // Can't check from here — fall back to optimistic-open rather than
+        // getting stuck on "Checking..." forever. The server-side check in
+        // /api/register is the real, unbypassable gate either way.
+        if (active) setRegistrationOpen(true);
+        return;
+      }
+      const { data: row, error } = await supabase
+        .from("site_settings")
+        .select("registration_enabled")
+        .eq("id", 1)
+        .maybeSingle();
+      if (!active) return;
+      if (error) {
+        setRegistrationOpen(true);
+        return;
+      }
+      setRegistrationOpen((row?.registration_enabled as string | undefined) === "true");
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -146,6 +182,19 @@ export default function RegistrationForm() {
         <article className="legal-article reg-article">
           <p className="legal-eyebrow">{t("courseRegistration")}</p>
 
+          {registrationOpen === null && step !== "success" ? (
+            <p className="legal-updated top-gap-lg">{t("regChecking")}</p>
+          ) : registrationOpen === false && step !== "success" ? (
+            <div className="reg-result top-gap-lg">
+              <div className="reg-result-icon error" aria-hidden="true">!</div>
+              <h2 className="reg-result-title">{t("regClosedTitle")}</h2>
+              <p className="legal-updated">{t("regClosedBody")}</p>
+              <Link href="/" className="gold-btn top-gap-lg inline-btn">
+                {t("regBackHome")}
+              </Link>
+            </div>
+          ) : (
+            <>
           {step === "form" ? (
             <>
               <p className="legal-updated">{t("regPageIntro")}</p>
@@ -277,6 +326,8 @@ export default function RegistrationForm() {
               </button>
             </div>
           ) : null}
+            </>
+          )}
         </article>
       </main>
 
