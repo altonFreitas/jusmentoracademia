@@ -117,7 +117,8 @@ input[type="file"]:disabled {
   --ink-soft: #33415a;
   --paper: #f6f1e7;
   --paper-2: #efe7d6;
-  --gold-deep: #9a7a13;
+  /* --gold-deep: #9a7a13; */
+  --gold-deep: #7a610f;
   --gold-ink: #6e5710;
 
   --surface: rgba(255, 255, 255, 0.72);
@@ -1005,6 +1006,21 @@ blockquote {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* body.has-cookie-banner {
+  padding-bottom: clamp(360px, 45vw, 420px)
+} */
+
+body.has-cookie-banner {
+  padding-bottom: 330px;
+}
+
+@media (max-width: 640px) {
+  body.has-cookie-banner {
+    padding-bottom: 480px;
+  }
+}
+
 .carousel-track::-webkit-scrollbar {
   display: none;
 }
@@ -2655,6 +2671,10 @@ textarea:focus-visible,
   padding: clamp(12px, 3vw, 24px);
   animation: cookieIn 0.5s var(--ease-out);
 }
+body.has-cookie-banner {
+  padding-bottom: clamp(180px, 32vh, 260px);
+}
+
 @keyframes cookieIn {
   from {
     opacity: 0;

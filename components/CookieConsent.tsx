@@ -107,6 +107,11 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    document.body.classList.toggle("has-cookie-banner", bannerOpen);
+      return () => document.body.classList.remove("has-cookie-banner");
+  }, [bannerOpen]);
+
   const persist = useCallback((next: ConsentCategories) => {
     const record: StoredConsent = {
       version: CONSENT_VERSION,

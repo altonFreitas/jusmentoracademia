@@ -206,7 +206,13 @@ function Carousel({
 
   return (
     <div className={`carousel ${className}`}>
-      <div className={`carousel-track ${trackClassName}`} ref={trackRef}>
+      <div
+        className={`carousel-track ${trackClassName}`}
+        ref={trackRef}
+        tabIndex={0}
+        role="group"
+        aria-label="Scrollable content, use arrow keys to browse"
+      >
         {children}
       </div>
       {canPrev && (
