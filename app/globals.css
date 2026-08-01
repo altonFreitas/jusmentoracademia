@@ -3026,15 +3026,6 @@ textarea:focus-visible,
    ========================================================================== */
 .reg-article {
   max-width: 700px;
-  /* Extra bottom clearance so the fixed, bottom-pinned cookie consent
-     banner can't cover the Submit button (or the success/error screens'
-     content) for a first-time visitor who hasn't made a cookie choice
-     yet. Sized against the banner's actual measured height (which peaks
-     around 360-390px-wide phones, where its text/buttons wrap the most —
-     not simply proportional to viewport width). Stacks on top of
-     .legal-main's own bottom padding — scoped to just this page so the
-     plain legal/reading pages aren't affected. */
-  padding-bottom: clamp(360px, 45vw, 420px);
 }
 .reg-form {
   display: block;
