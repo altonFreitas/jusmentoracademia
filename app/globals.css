@@ -99,8 +99,7 @@ input[type="file"]:disabled {
 /* --------------------------------------------------------------------------
    2. Design tokens
    -------------------------------------------------------------------------- */
-.page-shell,
-.admin-page-shell {
+:root {
   /* Brand palette (kept stable for the admin studio) */
   --navy: #0e1a33;
   --navy-2: #0a1428;
@@ -158,7 +157,10 @@ input[type="file"]:disabled {
     "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
 
   --container: 1200px;
+}
 
+.page-shell,
+.admin-page-shell {
   min-height: 100vh;
   background:
     radial-gradient(120% 80% at 100% -10%, rgba(230, 199, 102, 0.12), transparent 55%),
