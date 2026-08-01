@@ -30,11 +30,11 @@ const csp = [
   // 'unsafe-eval' is added only in development: Next.js dev mode / Turbopack
   // relies on eval() for hot-reload and stack traces. Production builds never
   // use eval(), so the production CSP stays strict.
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ""}`,
   `style-src 'self' 'unsafe-inline'`,
   `img-src 'self' data: blob: https://images.unsplash.com ${supabaseHost}`,
   `font-src 'self' data:`,
-  `connect-src 'self' ${supabaseHost} ${supabaseWs}`,
+  `connect-src 'self' ${supabaseHost} ${supabaseWs} https://vitals.vercel-insights.com`,
   `media-src 'self'`,
   `worker-src 'self' blob:`,
   `manifest-src 'self'`,

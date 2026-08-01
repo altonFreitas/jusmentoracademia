@@ -777,7 +777,13 @@ export default function PublicSite() {
         <section id="top" className="hero">
           {settings.heroImage ? (
             <div className="hero-media" aria-hidden="true">
-              <img src={settings.heroImage} alt="" className="hero-media-img" />
+              <img
+                src={settings.heroImage}
+                alt=""
+                className="hero-media-img"
+                fetchPriority="high"
+                decoding="async"
+              />
               <div className="hero-scrim" />
             </div>
           ) : (
@@ -1132,7 +1138,13 @@ export default function PublicSite() {
                   const inner = (
                     <div className="card-body center-text">
                       {partner.image ? (
-                        <img className="partner-logo" src={partner.image} alt={partner.name} />
+                        <img
+                          className="partner-logo"
+                          src={partner.image}
+                          alt={partner.name}
+                          loading="lazy"
+                          decoding="async"
+                        />
                       ) : (
                         <div className="feature-icon center-icon" aria-hidden="true">🤝</div>
                       )}
