@@ -1007,10 +1007,6 @@ blockquote {
   scrollbar-width: none;
 }
 
-/* body.has-cookie-banner {
-  padding-bottom: clamp(360px, 45vw, 420px)
-} */
-
 body.has-cookie-banner {
   padding-bottom: 330px;
 }
@@ -1102,11 +1098,7 @@ body.has-cookie-banner {
     rgba(255, 255, 255, 0.96),
     rgba(255, 255, 255, 0.88)
   );
-  /* transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry))
-    translateY(var(--lift));
-  transform-style: preserve-3d;
-  transition: transform 0.35s var(--ease), box-shadow 0.5s var(--ease),
-    border-color 0.4s var(--ease); */
+ 
   transition: box-shadow 0.3s var(--ease), border-color 0.3s var(--ease);
 }
 /* Gradient micro-border */
@@ -1129,22 +1121,7 @@ body.has-cookie-banner {
   pointer-events: none;
   z-index: 0;
 }
-/* Pointer spotlight — removed (was causing a gold hover glow) */
-/* .card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    240px 240px at var(--px, 50%) var(--py, 0%),
-    rgba(230, 199, 102, 0.18),
-    transparent 60%
-  );
-  opacity: var(--glow, 0);
-  transition: opacity 0.4s var(--ease);
-  pointer-events: none;
-  z-index: 0;
-} */
+
 .card > * {
   position: relative;
   z-index: 1;
@@ -2670,9 +2647,6 @@ textarea:focus-visible,
   justify-content: center;
   padding: clamp(12px, 3vw, 24px);
   animation: cookieIn 0.5s var(--ease-out);
-}
-body.has-cookie-banner {
-  padding-bottom: clamp(180px, 32vh, 260px);
 }
 
 @keyframes cookieIn {
